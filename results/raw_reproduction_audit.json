@@ -1,0 +1,84 @@
+{
+  "mode": "Aggregate export of verified raw-data reruns",
+  "comparisons": {
+    "v47": {
+      "pairs": 25,
+      "exact_pair_receipts": 25,
+      "changed_numeric_fields": 0,
+      "largest_absolute_display_change": 0,
+      "largest_change": null
+    },
+    "v46_fit": {
+      "pairs": 18,
+      "exact_pair_receipts": 0,
+      "changed_numeric_fields": 203,
+      "largest_absolute_display_change": 0.000503224014841791,
+      "largest_change": {
+        "field": "/last_three_minus_frozen/BA/pair_t_ci/1",
+        "historical": 0.1422899545123645,
+        "rerun": 0.14178673049752272,
+        "delta": -0.000503224014841791
+      }
+    },
+    "v48": {
+      "pairs": 18,
+      "exact_pair_receipts": 0,
+      "changed_numeric_fields": 391,
+      "largest_absolute_display_change": 0.0009803921568626306,
+      "largest_change": {
+        "field": "/arms/M1_target_encoder/BA/leave_one_pair_out_range/1",
+        "historical": 0.6740196078431372,
+        "rerun": 0.6749999999999998,
+        "delta": 0.0009803921568626306
+      }
+    },
+    "v56": {
+      "pairs": 18,
+      "exact_pair_receipts": 0,
+      "changed_numeric_fields": 701,
+      "largest_absolute_display_change": 0.001851851851851806,
+      "largest_change": {
+        "field": "/paired_differences/M3_local_minus_M1_target_encoder/intercept_only/BA/pair_bootstrap_ci/0",
+        "historical": -0.037962962962963,
+        "rerun": -0.0398148148148148,
+        "delta": -0.001851851851851806
+      }
+    },
+    "v61": {
+      "pairs": 22,
+      "exact_pair_receipts": 22,
+      "changed_numeric_fields": 0,
+      "largest_absolute_display_change": 0,
+      "largest_change": null
+    },
+    "v65": {
+      "pairs": 21,
+      "exact_pair_receipts": 21,
+      "changed_numeric_fields": 0,
+      "largest_absolute_display_change": 0,
+      "largest_change": null
+    },
+    "v68": {
+      "pairs": 22,
+      "exact_pair_receipts": 22,
+      "changed_numeric_fields": 0,
+      "largest_absolute_display_change": 0,
+      "largest_change": null
+    },
+    "v67": {
+      "exact_participant_receipts": 12
+    }
+  },
+  "fixed_model_ancillary": {
+    "roc_auc": 0.8796296296296297,
+    "bootstrap_ci95": [
+      0.7777199074074074,
+      0.9606481481481481
+    ],
+    "group_sizes": [
+      12,
+      36
+    ],
+    "scope": "historical fixed-model negative log likelihood on the reused H40 windows"
+  }
+}

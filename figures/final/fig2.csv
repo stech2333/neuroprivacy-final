@@ -1,0 +1,7 @@
+panel,comparison,estimate,lower_97_5,upper_97_5,n,unit,source
+b,Stieger C8 · 22 pairs,3.7519446766721574,0.5268826275105806,6.977006725833734,22,Brier reduction vs no history ($\times 10^{-3}$),V68 C8
+b,OpenBMI C20 · 18 pairs,7.925643772718741,5.4150782851540225,10.43620926028346,18,Brier reduction vs no history ($\times 10^{-3}$),OpenBMI registered C20
+b,NETBCI C8 · 12 people,1.4780825588119746,-0.06355289548249453,3.166035081530698,12,Brier reduction vs no history ($\times 10^{-3}$),V67 C8 Days 2–4
+d,Stieger C8 · 22 pairs,3.497576566829809,0.07639688450822085,6.918756249151397,22,Brier reduction vs partner history ($\times 10^{-3}$),V68 C8
+d,OpenBMI C20 · 18 pairs,3.484842670972357,1.1700769545309646,5.799608387413749,18,Brier reduction vs partner history ($\times 10^{-3}$),OpenBMI registered C20
+d,NETBCI C8 · 6 pairs,0.5557352678414841,-3.7282067421075444,4.839677277790512,6,Brier reduction vs partner history ($\times 10^{-3}$),V67 C8 Days 2–4

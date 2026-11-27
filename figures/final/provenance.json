@@ -1,0 +1,33 @@
+{
+  "inputs": {
+    "results/audit.json": "f958e5b41d6d6f7c519fede5823fad58296dcd8563a68052ee3bce0e616671b4",
+    "results/raw_reproduction_audit.json": "fee86a47362bdd02ad45ee84b0997803b279a73fdac93675977a0083169e186b",
+    "results/primary_statistics.json": "8b4bc92de6b36ac0428342e87500bdbcb4c3a911a03974c1e95da981d05bba07",
+    "results/raw_reproduction/netbci/evaluation/v67_aggregate.json": "08ffa21cddd2d60bf19c06f4ce4f42f5167d2a175dfbd9ba67f8d1d42bf06cc2",
+    "results/raw_reproduction/netbci/evaluation/controls_C8.json": "35456dcbe3afc8750f0921ce963feddcdb039d2add4eafa656db6d16320dbb69",
+    "results/raw_reproduction/openbmi_controls/20261126T161815835053Z/result.json": "bd7a1b55588d4193b1f60e3ac0dab3b2d95d327e9e5d0164d3e12df4349230c5",
+    "results/stieger_C8_controls/20261126T161740948042Z/result.json": "3f7ab806ac2f5d85dce4884055d3e064144a65fd59bd2337c23c38f91f8f2c41"
+  },
+  "outputs": {
+    "figures/final/fig1.csv": "999a060fe8b3a8130a65ba51a4508eb3072ac5eb8c9ae7a56566b7b5e950fd29",
+    "figures/final/fig1.pdf": "0c55d36d18e0cb34c3dee4719aaa6ecd02c92026cca0000bee6717e8c5ce9e31",
+    "figures/final/fig1.png": "148f1376d999a7dab4899817f420a0a2010d12a9aceaf1cfb1588a0d5d9b56df",
+    "figures/final/fig1.svg": "dbcdec022e7134fa5f3c04e34fe1ddf500c07c541087d9f2f79d4984a786ebaa",
+    "figures/final/fig2.csv": "304884ec7fce9f1837b829c4e9bb44feee0b12be3339612557a58b4860f29096",
+    "figures/final/fig2.pdf": "738e2d13114aa6f7ea87646d5ee0e575693ff78ca34351947fd26a16d4160169",
+    "figures/final/fig2.png": "be88bab72848bb5f2a37b0c275185e7d117d2428245d6dfcecfb39e3f66056dd",
+    "figures/final/fig2.svg": "34d22ee8817d57aab35f46017fba1c1f3375aa48fe056d1e3b253a1725bf356c",
+    "figures/final/fig3.csv": "071cfb68ae6fd7aef6da5dae283b551ef4bfcf4e5846c44db11f98f015b97ee1",
+    "figures/final/fig3.pdf": "e86880dc3d055cc713e365b60d3ae20dc75f663f823aeb5f83dc0444e7004689",
+    "figures/final/fig3.png": "78081912c54fb56dde77e736924ac90f3bb6c20b099e54d441c9606512676a11",
+    "figures/final/fig3.svg": "7e465919182a20bfff0e382b25fb6b3e800bed3965908fc97929ea3067429538",
+    "figures/final/fig4.csv": "d326928040660f38bc4b85323ade1e04ca76e460eed08687e005aea90703f01d",
+    "figures/final/fig4.pdf": "eb02a83f2f8ea5d8a4c741ab65699b28c2d8ffaee92021e882732032e50e7082",
+    "figures/final/fig4.png": "a72a82115fb13f651fcd70126649ace8de178eaf16f185cbc6181b958ce5626d",
+    "figures/final/fig4.svg": "6489078725c6bac4f10628bba504ce9d8a6fa4a61a00a64b21ad644bfc99555b",
+    "figures/final/legends.md": "0a6ca431174cfa6e9a76662de3b44b1db085633cfe397100df5909e3c4de366d",
+    "results/table1_cohorts.csv": "d0f5420c9c4aa66559b749fda6be63e793e781dd3dd43156be8e942f2ce0aab1",
+    "results/table2_methods.csv": "38e27de9f18399fb7c081ddfa287e7788eff7151b540a31cb01d3a65ef7c7729"
+  },
+  "scope": "GitHub aggregate export"
+}

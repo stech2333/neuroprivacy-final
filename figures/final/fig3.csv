@@ -1,0 +1,8 @@
+panel,comparison,estimate,lower_97_5,upper_97_5,n,unit,source
+b,Balanced accuracy,1.1325757575757578,0.8815792564771289,1.3835722586743864,22,Distance above acceptance boundary / margin,V68 C8
+b,Brier score,1.0633504781492795,0.9574556386840667,1.1692453176144921,22,Distance above acceptance boundary / margin,V68 C8
+b,Prediction MAE,0.2526327801877744,0.17705848782568356,0.32820707254986525,22,Distance above acceptance boundary / margin,V68 C8
+d,isotropic,0.01378944863623794,,,22,97.5% upper MAE · 8 array bytes,Stieger fixed C8 P0–P5
+d,diagonal,0.013803104769988054,,,22,97.5% upper MAE · 7576 array bytes,Stieger fixed C8 P0–P5
+d,full,0.000252335206976827,,,22,97.5% upper MAE · 7174472 array bytes,Stieger fixed C8 P0–P5
+d,rank 16,0.008229415121743165,,,22,97.5% upper MAE · 128920 array bytes,Stieger fixed C8 P0–P5

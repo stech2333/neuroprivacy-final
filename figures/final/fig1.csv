@@ -1,0 +1,8 @@
+panel,comparison,estimate,lower_97_5,upper_97_5,n,unit,source
+b,Dreyer · 25 pairs,46.0,40.0,50.66666666666667,25,H − W (percentage points),V47 adapted
+b,OpenBMI · 18 pairs,26.851851851851848,13.88888888888889,39.81481481481482,18,H − W (percentage points),V46 adapted
+b,Stieger · 21 pairs,41.66666666666667,34.523809523809526,47.61904761904761,21,H − W (percentage points),V65 block-disjoint
+c,Dreyer,38.666666666666664,29.333333333333332,47.33333333333333,25,Adapted − frozen H − W (pp),V47
+c,OpenBMI,25.92592592592593,12.962962962962965,38.888888888888886,18,Adapted − frozen H − W (pp),V46
+d,OpenBMI,-2.7777777777777777,-10.185185185185187,4.62962962962963,18,W − R (percentage points),V46 adapted
+d,Stieger,4.761904761904762,-0.7936507936507939,12.301587301587302,21,W − R (percentage points),V65 block-disjoint

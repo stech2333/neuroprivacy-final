@@ -1,0 +1,15 @@
+{
+  "reference": {
+    "K1": 0.46,
+    "K2": 0.38666666666666666
+  },
+  "rerun": {
+    "K1": 0.46,
+    "K2": 0.38666666666666666
+  },
+  "equal_primary_effects": true,
+  "coverage": 25,
+  "historical_lock": "edc6372642c3f51a9b9130e998c26edea3de2cd6f8183e6a99d7f4a1c176b554",
+  "source_runner": "9c2902aae33a5a0dcf9f80e69b5077de8884725f9d0c943e1b6bc2b8be2d7699",
+  "result_sha256": "f63144254d775252d4f03680748eab1a8196a126c082e03695dc2d2383598efc"
+}

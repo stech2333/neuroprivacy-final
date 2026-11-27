@@ -1,0 +1,5 @@
+﻿cohort,registered_people,risk_model,risk_n_pairs,H_minus_W_mean,adaptation_interaction_mean,utility_model,utility_n,own_minus_day_only_Brier_mean,offline_K6
+Dreyer,87,"CBraMod, last three blocks",25,0.46,0.38666666666666666,,,,
+OpenBMI,54,"CBraMod, last three blocks",18,0.2685185185185185,0.2592592592592593,"CBraMod, rank-8 local head",18 pairs,-0.007925643772718741,Isolation passed
+Stieger,62,"TS-LR, separated acquisition blocks",21,0.4166666666666667,,"TS-LR, rank-16 local head",22 pairs,-0.0037519446766721572,Isolation passed
+NETBCI,19,,,,,"TS-LR, rank-4 local head",12 people across three days,-0.0014780825588119745,

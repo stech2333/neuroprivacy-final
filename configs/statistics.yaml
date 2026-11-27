@@ -1,0 +1,20 @@
+# 实施细则。原协议第九节规定方向、独立单位、检验族及历史区间。
+primary:
+  K1: [Dreyer, V47, last_three_H_minus_W]
+  K2: [Dreyer, V47, last_three_minus_frozen_H_minus_W]
+  K3: [Stieger, V68, C8, background_minus_own_rank16_Brier]
+  K4: [Stieger, V68, C8, partner_rank16_minus_own_rank16_Brier]
+  K5: [Stieger, V68, C8, own_rank16_minus_exact_shared_BA_Brier_and_probability_MAE]
+  K6: [OpenBMI, Stieger, V51, V58, V74, offline_engineering]
+statistical_unit: original_pair_mean
+directional_p: one_sample_t_on_signed_pair_differences_against_null_boundary
+bounded_effect_interval: original_pair_percentile_bootstrap
+bootstrap_seed: 20261120
+bootstrap_draws: 10000
+historical_ci_level: 0.975
+family: [K1, K2, K3, K4, K5]
+correction: holm
+family_alpha: 0.05
+K5_component_p_combination: maximum
+K5_interval_gate: historical_pair_t_bounds
+K6_in_pvalue_family: false

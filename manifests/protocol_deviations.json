@@ -1,0 +1,32 @@
+[
+  {
+    "type": "implementation_choice",
+    "scope": "K1–K5",
+    "record": "原协议指定单侧检验，未唯一指定计算 p 值的统计量。以人对均值差及相应界值做单侧配对 t 检验，同时核对历史 97.5% t 和 bootstrap 区间。"
+  },
+  {
+    "type": "known_design_limit",
+    "scope": "K5/K6",
+    "record": "V49 在曾用于评价的队列上选秩。下游隔离以冻结的秩和背景配置为条件，历史选型不能当作独立验证。"
+  },
+  {
+    "type": "operational",
+    "scope": "V51",
+    "record": "首次独立输出目录缺少旧脚本所需的同级曲率文件。在新运行目录内复制原始摘要，按原 SHA-256 核对，再执行原脚本。"
+  },
+  {
+    "type": "provenance_limit",
+    "scope": "legacy registration",
+    "record": "部分旧登记以文件名为哈希字典键，同名 result.json 仅留一项。另以工作区相对路径和实际 SHA-256 冻结每个来源。"
+  },
+  {
+    "type": "coverage",
+    "scope": "data manifests",
+    "record": "试次表以核心评价面板为范围。Stieger V61/V65 的 H 和 W 记录基础分配，第二方向交换两者。NETBCI 使用已封存面板的行号。原始波形重提取待独立复现。"
+  },
+  {
+    "type": "applicability",
+    "scope": "V55/V56/V57/V67/V75",
+    "record": "V55 旧 NETBCI 配置未过整体效用门。V56 与完整共享深层适配的非劣未成立。V57 等效性证据不足。V67 C8 历史效用区间跨零。V75 新适配器未解决深层差距。各自保留原始状态。"
+  }
+]

@@ -1,0 +1,35 @@
+{
+  "protected_object": "target_personal_history",
+  "shared_encoder_frozen": true,
+  "target_history_in_shared_training": false,
+  "target_history_in_shared_preprocessing": false,
+  "target_history_in_shared_selection": false,
+  "allow_local_history_learning": true,
+  "allow_local_calibration": true,
+  "target_history_upload": false,
+  "personal_model_update_upload": false,
+  "require_shared_artifact_invariance": true,
+  "claim_formal_differential_privacy": false,
+  "claim_background_participant_privacy": false,
+  "claim_complete_device_security": false,
+  "original_threat_model": [
+    "项目\t正式定义",
+    "保护对象\t新增目标参与者的个人神经历史",
+    "保护信息\t历史内容、历史训练使用关系及个人适配状态",
+    "潜在风险\t共享学习产生的训练记录相关成员信号",
+    "共享可见产物\t背景编码器、背景任务头、结构化背景损失摘要",
+    "共享可见接口\t规定的固定背景模型预测接口",
+    "本地可信边界\t个人历史、当天校准、个人任务头及本地状态",
+    "保护机制\t目标历史与共享学习路径分离",
+    "核心保护要求\t目标个人历史变化不影响规定共享产物",
+    "效用要求\t保持相对精确共享任务头重拟合的任务非劣性",
+    "不在当前保护范围内的风险",
+    "包括背景训练参与者的隐私、个人设备遭到入侵、未经授权的本地模型访问、真实遥测旁路、外部第三方系统数据泄露，以及模型原始预训练阶段已经存在的目标个人信息。",
+    "因此，本研究提供的是特定共享边界下的目标个人历史隔离保护，而不是整个神经解码系统的全面隐私保证。"
+  ],
+  "downstream_claim_conditions": [
+    "固定开发/背景材料、配置、随机条件及共享接口",
+    "改变个人历史只允许改变设备端状态",
+    "开发选型及预训练范围单独登记"
+  ]
+}

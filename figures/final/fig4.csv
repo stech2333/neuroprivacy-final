@@ -1,0 +1,7 @@
+panel,comparison,estimate,lower_97_5,upper_97_5,n,unit,source
+b,OpenBMI local,0.029558724810886745,,,,local mean absolute change,V51
+b,OpenBMI shared,0.0,,,,shared maximum drift,V51
+b,Stieger local,0.024936431997610278,,,,local mean absolute change,V51
+b,Stieger shared,0.0,,,,shared maximum drift,V51
+d,V48 · matched head,13.53685745869095,6.019897226270156,21.053817691111743,18,Local M3 − shared M1 Brier ($\times 10^{-3}$),v48/M3_vs_M1
+d,V56 · Platt calibrated,4.698483457066579,-1.1352249113088875,10.532191825442045,18,Local M3 − shared M1 Brier ($\times 10^{-3}$),v56/M3_vs_M1_Platt

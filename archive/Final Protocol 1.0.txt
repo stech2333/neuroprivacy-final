@@ -1,0 +1,1888 @@
+神经数据隐私保护研究：文献调研、科学问题与最终核心实验框架
+Final Protocol 1.0｜Phase 0 研究收口与正式研究设计
+
+本方案依据《神经数据隐私研究实验详报》（2026 年 11 月 26 日）、V1–V76 前置实验结果，以及已有研究协议，结合神经数据隐私、模型成员推断、EEG 基础模型、跨会话个性化学习、隐私保护型迁移学习和结构化曲率近似等相关领域文献，最终确定研究 Idea、科学问题、研究假设、保护方法、实验框架及统计标准。
+
+本次调整的核心是将神经数据隐私保护作为首要研究目标，而不是将隐私保护作为神经解码个性化学习的附带功能。
+
+研究围绕三个相互关联的问题展开：首先确定个人神经数据参与共享学习时产生的隐私风险，其次明确隐私保护所面临的任务效用约束，最后建立能够在限制共享暴露的同时保留个人历史价值的保护方法。
+总体科学问题1 个
+效用保持型神经数据隐私保护
+
+核心科学假设3 个
+隐私暴露、效用约束、隐私隔离
+
+正式数据集4 个
+OpenBMI、Dreyer、Stieger、NETBCI
+
+正式实验模块4 组
+风险、效用、保护方法、保护验证
+
+核心模型家族2 类
+CBraMod、TS-LR
+
+主要科学检验6 项
+K1–K6
+
+
+
+研究阶段决议
+
+正式结束 Phase 0 前置研究阶段。V1–V76 及相关实验全部进入归档流程，不再增加探索性实验编号、新数据集、新基础模型或新的研究分支。
+
+后续工作仅围绕固定科学假设进行代码重构、必要对照补齐、统计复算、完整计算复现及论文证据整合。
+
+一、相关领域深度文献调研
+本研究的文献调研主要围绕四个方向展开：
+1. 神经数据的隐私敏感性及模型层面的隐私风险。
+2. EEG 模型中的成员暴露及其形成条件。
+3. 神经数据隐私保护与个性化解码效用之间的关系。
+4. 面向神经数据保护的本地学习及结构化背景知识利用。
+1.1 神经数据隐私及模型成员推断
+参考文献	主要研究内容	对本研究的启示
+Finn et al., 2015, Nature Neuroscience — Functional connectome fingerprinting	脑功能连接具有可重复的个体特征	去除直接身份标识并不意味着消除个体关联信息
+Shokri et al., 2017, IEEE S&P — Membership Inference Attacks Against Machine Learning Models	建立机器学习训练成员推断问题	为模型层面的训练成员隐私风险提供研究基础
+Yeom et al., 2018/2020 — Overfitting, robustness, and malicious algorithms	分析过拟合、模型稳定性与隐私风险	需要区分一般过拟合与神经数据场景中的特殊因素
+Demuru & Fraschini, 2020 — EEG fingerprinting	研究 EEG 频谱中的个体特征	神经记录具有潜在个体关联性
+Gupta et al., 2021, MIDL — Membership Inference Attacks on Deep Regression Models for Neuroimaging	研究神经影像年龄预测模型中的成员风险	神经数据隐私可能延伸至学习后的模型
+Carlini et al., 2022, IEEE S&P — Membership Inference Attacks From First Principles	强调隐私评价中的低误报条件	单一 AUC 不足以代表实际部署风险
+Ye et al., 2022, ACM CCS — Enhanced Membership Inference Attacks	从统计假设检验角度研究成员推断	支持明确成员关系、评价条件及统计单位
+Jwa & Poldrack, 2022 — Addressing privacy risk in neuroscience data	从神经科学数据保护扩展到潜在伤害防范	隐私保护应明确实际保护对象
+Mandal & Saxena, 2022, ACM WiSec — SoK: Your Mind Tells a Lot About You	总结脑电设备相关隐私问题	需要区分原始数据、模型及设备层面的风险
+Cobilean et al., 2025, IEEE JBHI — Investigating Membership Inference Attacks Against CNN Models for BCI Systems	研究 EEG CNN 的模型成员风险	与当前隐私风险研究直接相关
+Khanam et al., 2026, Brain Informatics — Evaluating multi-level membership inference risk in federated EEG learning	研究联邦 EEG 学习的多层次隐私风险	原始数据不集中并不自动意味着模型隐私安全
+2026 年 11 月预印本 — Understanding Membership Inference Attacks on EEG Models	系统比较 EEG 模型的成员风险及影响因素	需要进一步突出本研究的保护方法，而非单纯风险发现
+
+重点相关研究一：Cobilean 等，2025
+Investigating Membership Inference Attacks Against CNN Models for BCI Systems
+
+该研究已经直接讨论 EEG 分类模型中的成员推断风险，并涉及模型结构、训练数据构成及参与者差异等因素。
+
+PubMed
+
+这意味着，本研究不能再将“首次发现 EEG 模型可能产生训练成员风险”作为创新点。
+
+本研究与该方向的区别应当主要体现在以下方面：
+对比维度	已有研究	本研究
+研究对象	EEG CNN 分类模型	EEG 基础模型与传统解码模型
+风险研究	模型训练成员风险	训练记录依赖及其会话边界
+模型因素	网络结构及训练因素	固定预训练模型的适配范围
+效用研究	分类性能与风险分析	个人历史的条件性任务价值
+保护目标	分析及降低模型隐私风险	避免目标个人历史进入共享学习
+保护方法	模型及训练因素调整	结构化背景损失摘要与本地学习
+
+当前研究更需要关注具体训练记录为什么产生隐私相关信号，以及保护这些记录是否必须牺牲其个性化价值。
+重点相关研究二：Khanam 等，2026
+Evaluating multi-level membership inference risk in federated EEG learning
+
+该研究针对运动想象 EEG，比较联邦学习及差分隐私联邦学习中的多层次隐私风险，并分析保护条件与任务性能之间的关系。
+
+Springer+1
+
+该论文与本研究的隐私保护方向直接相关。
+
+两种研究路线的主要区别如下：
+联邦隐私保护学习
+个人神经数据
+
+本地训练与隐私机制
+
+共享模型聚合
+在参与共享学习的前提下限制数据影响及隐私风险。
+
+本研究的隐私保护学习
+固定背景模型与知识摘要
+
+个人历史本地学习
+
+设备本地个性化预测
+目标个人历史无需参与共享训练，也不需要回传个人更新。
+
+
+本研究并非试图全面替代联邦学习或差分隐私，而是研究另一种保护策略：在个人历史只需服务于本人任务的情况下，是否能够避免其进入共享学习过程。
+重点相关研究三：2026 年 11 月最新 EEG 成员风险研究
+本轮重新核查文献时，发现了一篇与当前研究高度相关的近期预印本：
+
+Understanding Membership Inference Attacks on EEG Models，2026 年 11 月 20 日提交。
+
+该研究涉及三个数据集、七种模型架构及多种隐私评价条件。其公开结果指出，较差的模型泛化能力与成员风险密切相关，训练时间和模型规模也可能影响风险。该论文目前属于预印本，其结论仍需结合后续评审判断。
+
+arXiv
+
+这一最新研究进一步说明，单纯研究 EEG 模型的成员风险、模型大小或训练程度已经不足以形成有区别度的完整研究。
+
+本研究需要重点突出：
+- 具体入训记录相关的隐私风险及纵向边界。
+- 个人神经历史的任务价值对隐私保护形成的约束。
+- 不依赖目标历史共享训练的保护机制。
+- 保护条件下的任务非劣性和共享产物隔离。
+这也是将隐私保护而非成员推断作为整篇论文主线的重要依据。
+1.2 神经数据隐私保护与迁移学习
+参考文献	主要研究内容	对本研究的启示
+Protecting Privacy of Users in Brain-Computer Interface Applications, 2019	EEG 用户隐私保护	需要明确神经数据保护对象
+Privacy-Preserving Domain Adaptation for Motor Imagery-Based BCIs, 2022	无源域适配	可以在不访问完整源域数据的条件下进行迁移
+Multi-Source Decentralized Transfer for Privacy-Preserving BCIs, 2022	多来源分布式迁移	支持通过模型信息而非原始记录实现知识迁移
+Privacy-Preserving Brain–Computer Interfaces: A Systematic Review	BCI 隐私保护方法综述	为保护对象及风险分类提供参考
+User Identity Protection in EEG-Based Brain-Computer Interfaces, 2023	EEG 用户身份保护	身份隐私与训练成员隐私需要分别讨论
+Online Privacy-Preserving EEG Classification by Source-Free Transfer Learning, 2024	在线无源 EEG 迁移学习	支持原始数据隔离条件下的模型适配
+Meng et al., 2024 — Protecting multiple types of privacy simultaneously in EEG-based BCIs	多类型 EEG 隐私保护	不同隐私属性不能通过单一指标概括
+Transformer-Based SFDA for Privacy-Preserving EEG-Based BCI Systems, 2026	基于 Transformer 的无源域适配	无源适配已经具有较丰富的相关方法
+
+2022 年的 ASFA 和 2024 年的 OSFTL 已经研究了在不访问源域原始 EEG 数据的条件下实现迁移学习。
+
+数字对象标识符+1
+
+因此，本研究不能将“数据留在本地”或“无源域学习”本身作为主要算法创新。
+
+本研究需要突出两个不同的保护方向：
+
+一方面，个人设备无需获得完整背景参与者神经数据；另一方面，目标个人历史无需进入规定的共享训练和发布流程。
+
+其中，目标个人历史的共享隔离是本研究主要验证的保护目标。背景参与者数据没有直接下发，并不代表背景模型或曲率摘要已经满足背景参与者隐私保证。
+1.3 EEG 跨被试、跨会话及个性化学习
+参考文献	主要研究内容	对本研究的启示
+Barachant et al., 2012 — Multiclass BCI classification by Riemannian geometry	协方差与黎曼几何分类	TS-LR 方法基础
+Jayaram & Barachant, 2018 — MOABB	可重复的 BCI 算法评价	固定跨队列评价协议
+Lee et al., 2019, GigaScience — OpenBMI	多参与者、两日 BCI 数据	支持跨日隐私及效用研究
+Kostas & Rudzicz, 2020 — Thinker invariance	跨被试 EEG 表征泛化	共享表征与个人差异需要分别处理
+Stieger et al., 2021, Scientific Data — Continuous sensorimotor rhythm based BCI learning	纵向运动想象神经数据	支持个人历史效用研究
+Selective Cross-Subject Transfer Learning, 2021	切空间跨参与者迁移	需要控制历史来源及样本预算
+Tangent Space Alignment, 2022	基于切空间的迁移学习	支持传统模型及低成本适配
+Dreyer et al., 2023, Scientific Data — A large EEG database with users’ profile information	87 名参与者的运动想象数据	支持独立队列记录风险分析
+Improving inter-session performance via relevant session-transfer, 2024	利用历史会话改善新会话预测	个人历史收益具有条件依赖性
+Wang et al., 2025, ICLR — CBraMod	EEG 基础模型	支持冻结与适配条件比较
+NETBCI, 2026, Scientific Data	四日纵向 EEG/MEG 数据	支持多日个性化效用验证
+
+这些研究为个人神经历史的任务价值提供了背景依据。
+
+但个人历史能够改善部分 EEG 解码任务，并不能直接说明将其纳入共享学习是必要的。
+
+本研究将个性化学习重新定义为隐私保护必须满足的效用约束，而不是独立追求分类性能提升的目标。
+1.4 结构化曲率近似与本地个性化学习
+参考文献	核心方法	对本研究的启示
+Kirkpatrick et al., 2017, PNAS — Elastic Weight Consolidation	参数重要性约束与持续学习	背景知识约束的理论基础
+Ritter et al., 2018, NeurIPS — Online Structured Laplace Approximations	结构化后验及曲率近似	背景损失近似的相关基础
+SLANG, 2018, NeurIPS — Fast Structured Covariance Approximations	低秩与对角结构	低秩加对角补偿已有方法先例
+Shoham et al., 2019 — FedCurv	曲率信息约束分布式学习	背景损失摘要的相关思路
+Arivazhagan et al., 2019 — FedPer	共享基础层和个性化层	共享学习与个人学习分离
+Collins et al., 2021, ICML — FedRep	共享表示和本地任务头	本地个性化架构相关基础
+Li et al., 2021, ICML — Ditto	全局参数约束下的本地学习	简单本地约束参照
+A Bayesian Federated Learning Framework With Online Laplace Approximation, 2023	在线 Laplace 联邦学习	二阶知识迁移研究
+Talpini et al., 2025, ICML — FedBEns	局部后验近似及单轮联邦学习	模型摘要与分布式知识利用
+
+1.5 文献调研总结与研究空白
+现有研究已经分别讨论了 EEG 成员风险、神经数据隐私保护、跨会话个性化学习以及结构化曲率近似。
+
+本研究不能简单地将这些技术组合起来，就认定形成了原创性较强的方法。
+
+真正需要建立的科学贡献是：
+已有研究基础	本研究拟进一步解决的问题
+EEG 模型存在成员风险	风险在多大程度上与实际训练记录及适配范围有关？
+EEG 存在个体差异与会话变化	哪些个人历史在未来任务中具有实际价值？
+本地学习可以减少数据集中	能否避免目标历史进入共享学习，同时保留其任务价值？
+曲率近似可以保存已有知识	能否用紧凑背景损失摘要近似集中式任务头优化？
+隐私保护可能伴随效用损失	能否在明确共享隔离边界下获得可量化的任务非劣性？
+
+最终研究定位：面向个人神经数据安全利用，在限制目标历史共享暴露的条件下，实现具有可验证效用的本地隐私保护学习。
+
+二、正式确定研究 Idea 与科学问题
+2.1 最终研究题目
+中文题目：
+
+《面向神经解码模型的个人神经数据隐私保护：训练记录暴露机制与效用保持型学习》
+
+英文题目：
+
+Privacy Protection of Personal Neural Data in EEG Decoding Models: Record-Level Exposure and Utility-Preserving Learning
+
+如果最终论文以保护方法为主要贡献，也可以采用：
+
+Utility-Preserving Neural Data Privacy through Structured Local Personalization
+
+中文：
+
+《基于结构化本地个性化学习的效用保持型神经数据隐私保护》
+
+现阶段建议采用第一个题目，因为它能够同时涵盖隐私风险研究、风险形成条件、个性化效用约束及隐私保护方法。
+2.2 研究背景与问题提出
+（1）神经数据的模型层面隐私风险
+随着脑机接口、神经解码模型及 EEG 基础模型的发展，个人神经数据被广泛用于模型预训练、下游任务适配及个性化学习。
+
+神经数据不仅包含与下游任务相关的神经活动信息，还可能包含与参与者个体差异、生理状态及采集会话相关的敏感信息。
+
+传统的数据匿名化和访问控制主要针对原始神经数据，但个人神经记录参与模型训练后，可能进一步形成与训练成员关系相关的模型依赖，使隐私风险从原始数据层面扩展至模型参数、预测行为及模型发布过程。
+
+因此，神经数据隐私保护不仅需要关注数据是否被直接公开，还需要关注个人神经信息是否必须进入共享模型，以及其参与训练后可能形成何种隐私相关暴露。
+（2）个人神经信息的隐私敏感性与任务价值
+在传统的隐私保护研究中，减少敏感信息使用通常被视为降低隐私风险的重要途径。
+
+然而，在纵向神经解码任务中，个人神经历史可能包含对未来解码有帮助的信息。由于 EEG 存在跨参与者差异、跨会话变化及个性化神经活动模式，完全禁止使用本人历史可能造成任务效用损失。
+
+现有前置实验已经为这一矛盾提供了直接依据。
+研究现象	已有实验结果
+共享模型形成训练记录依赖	OpenBMI、Dreyer、Stieger 均观察到正向 H−W 效应
+扩大模型适配范围可能增加记录依赖	Dreyer 适配交互 +38.67 pp
+增加历史敏感性不一定同步增加任务收益	V38 中 S 明确增加，但 G 的变化区间跨零
+本人历史具有条件性任务价值	Stieger V68 的本人历史优于当天校准及匹配者历史
+历史效用并不普遍成立	NETBCI V67 主效应区间跨零
+
+这些结果表明，个人神经数据不能简单地被划分为应该消除的隐私信息与应该保留的任务信息。两者可能同时存在于同一历史记录中。
+
+因此，需要研究能否通过限制个人信息的学习位置与可见范围，而不是简单删除个人信息，实现对神经数据的有效保护。
+（3）现有保护方法的研究局限
+现有神经数据隐私保护主要包括数据匿名化、身份信息抑制、差分隐私、联邦学习、无源域适配及本地化学习。
+
+这些方法分别从数据、模型、优化过程和系统架构等层面降低隐私风险，但其保护对象与适用条件并不相同。
+
+本研究关注一个更加具体的问题：
+
+对于仅用于服务本人未来神经解码任务的个人历史，是否有必要将其纳入共享模型训练？
+
+如果不需要，则可以通过共享背景学习与个人历史学习的分离，减少目标历史进入共享发布产物的机会。
+
+但简单地将个人数据留在本地并不能保证良好的任务效用。设备端无法访问完整背景训练数据，因此需要一种能够在保留背景任务知识的条件下完成个人历史学习的方法。
+
+这构成了本研究提出结构化背景损失摘要与本地个性化学习方法的直接动机。
+2.3 最终研究 Idea
+面向神经解码模型的效用保持型个人神经数据隐私保护。
+
+本研究拟分析个人神经数据参与共享模型训练所产生的记录相关成员信号，明确其与训练记录复用、会话变化及模型适配范围之间的关系。
+
+在此基础上，通过本人历史、无历史及等量匹配者历史的控制比较，研究个人神经历史的实际任务价值，确定隐私保护所面临的效用约束。
+
+进一步提出基于共享背景学习与个人历史学习分离的结构化本地保护方法。利用背景参与者数据构建固定共享编码器、任务头及结构化背景损失摘要，在个人设备端完成历史任务头更新和当天校准，使目标个人历史不参与规定的共享训练与发布过程。
+
+最终通过共享产物不依赖性、任务非劣性、预测近似精度及系统数据流验证，评价该方法能否在限制目标个人历史共享暴露的同时，保留其对本人神经解码任务的实际价值。
+2.4 总体科学问题
+个人神经数据参与共享神经解码模型训练时，如何形成与训练记录相关的隐私暴露？在个人神经历史具有潜在个性化任务价值的条件下，能否通过共享学习与个人学习的分离，限制个人神经数据在共享模型中的暴露，同时保持其对未来神经解码任务的实际效用？
+
+该问题包含三个相互递进的研究层次。
+个人神经历史数据
+既具有隐私敏感性，也可能具有实际任务价值
+
+隐私风险
+
+训练记录依赖
+
+成员相关信号
+
+共享模型数据暴露
+
+
+
+
+任务价值
+
+本人历史收益
+
+跨会话解码效用
+
+个性化适配需求
+
+
+
+
+
+核心科学矛盾
+
+限制个人神经数据的共享暴露，同时避免不必要的个性化效用损失
+
+
+效用保持型神经数据隐私保护
+
+固定共享背景模型＋结构化知识摘要＋个人历史本地学习
+
+
+2.5 三个核心科学问题
+RQ1：个人神经数据的模型层面隐私暴露如何形成？
+How does training on personal neural data induce privacy-relevant exposure in EEG decoding models?
+
+研究实际参与训练的神经记录与同日、跨日未参与训练记录之间的成员相关信号差异，分析模型适配范围对训练记录依赖的影响，并明确现有信号的泛化边界。
+
+主要解决：
+- 个人神经历史参与共享训练是否产生可测量的记录依赖？
+- 相关信号主要依赖具体训练记录，还是可以迁移至其他记录？
+- 扩大模型适配范围是否增强记录相关成员信号？
+- 模型记录依赖的变化是否与任务效用变化同步？
+研究目标：明确隐私风险的形成条件、保护对象及风险范围。
+RQ2：个人神经数据隐私保护面临怎样的任务效用约束？
+What utility constraints arise when protecting personal neural history in longitudinal EEG decoding?
+
+研究个人历史是否具有超出当天校准及等量他人历史的任务价值，确定完全排除个人历史是否可能造成未来任务效用损失。
+
+主要解决本人历史的增量价值、来源特异性、会话条件依赖性，以及获得这些价值是否需要共享训练。
+
+研究目标：确定隐私保护必须保留的任务能力，避免将所有个体相关信息都视为应当删除的隐私冗余。
+RQ3：如何在保持神经解码效用的同时限制个人神经数据的共享暴露？
+How can personal neural data exposure be restricted while preserving personalized decoding utility?
+
+研究能否利用背景任务知识摘要，在设备端完成个人历史学习，避免目标历史进入规定的共享训练与发布过程，同时保持相对精确共享任务头重拟合的预测效用。
+
+研究目标：建立具有明确保护对象、保护边界及效用验收标准的神经数据隐私保护方法。
+2.6 三个正式科学假设
+H1：训练记录隐私暴露假设
+Training-Record Exposure Hypothesis
+
+在固定背景数据、任务条件及评价协议下，实际参与训练的个人神经记录表现出强于同日未入训记录的成员相关信号；扩大预训练模型的适配范围可能增强这种记录依赖。
+
+现有实验依据：
+实验	结果
+OpenBMI V46：记录依赖	'+26.85 pp
+Dreyer V47：记录依赖	'+46.00 pp
+Stieger V61：记录依赖	'+42.42 pp
+Stieger V65：记录依赖	'+41.67 pp
+Dreyer V47：适配范围交互	'+38.67 pp
+
+H1 不宣称模型已经泄露真实个人身份，也不要求证明跨日未入训记录不存在成员风险。
+H2：隐私保护的个性化效用约束假设
+Personalization Utility Constraint Hypothesis
+
+在预定的部分纵向 EEG 解码条件下，目标参与者的本人历史能够提供超出当天校准及等量匹配者历史的预测价值，因此完全禁止使用本人历史可能造成个性化任务效用损失。
+
+现有实验依据：
+实验	本人历史 Brier 收益
+NETBCI V64：相对当天校准	'+0.00422
+NETBCI V67：相对当天校准	'+0.00148，区间跨零
+Stieger V68：相对当天校准	'+0.00375
+Stieger V68：相对匹配者历史	'+0.00350
+
+H2 允许不同队列具有不同的历史收益，不要求所有参与者均从个人历史中受益。
+H3：效用保持型隐私隔离假设
+Utility-Preserving Privacy Isolation Hypothesis
+
+在固定共享背景表征下，基于结构化背景损失摘要的设备本地学习能够近似精确共享任务头重拟合，并使规定的共享发布产物不依赖目标个人历史。
+
+H3 包含两个必须分别满足的条件：
+子假设	科学内容	对应实验
+H3a：效用保持	本地历史学习达到相对精确共享头的任务非劣及预测近似要求	Exp.3
+H3b：隐私隔离	目标历史及本地更新不改变规定共享模型与发布产物	Exp.4
+
+H3 不要求本地任务头无损替代所有共享深层微调方式，也不宣称实现了参与者级差分隐私。
+
+三个假设之间的关系如下：
+科学假设	隐私研究作用
+H1	说明为什么需要保护
+H2	说明保护过程中为什么需要保留个人历史价值
+H3	说明如何在保护隐私的同时保持任务效用
+
+
+三、Phase 0 正式结束：已有实验的最终整理
+3.1 前置实验归档原则
+将 V1–V76、E 系列、TH 系列及相关复跑记录重新划分为四类。
+A
+核心研究依据
+直接支持隐私风险、历史效用及保护可行性的实验。
+
+B
+方法选择依据
+确定最终数据、模型、配置、曲率结构及保护边界。
+
+C
+阴性与不确定结果
+未支持原假设，或者用于限定结论及方法适用范围。
+
+D
+技术储备
+替代模型、数据管线、工程诊断与退出主线的研究方向。
+
+
+同一实验可以同时具有多种作用，但不重复计算独立证据。已确认存在软件错误的结果应另行标记为无效，不与有效阴性实验混合。
+3.2 A 类：核心研究依据
+实验	核心结果	正式用途
+V29b	特定固定模型成员 ROC-AUC 0.8796	隐私风险背景
+V36–V37	受控训练纳入及检查点复播	风险评价协议核验
+V38	历史敏感性增加，任务收益变化不明确	隐私与效用关系
+V46	OpenBMI 记录重用效应 +26.85 pp	Exp.1
+V47	Dreyer 记录重用效应 +46.00 pp	Exp.1
+V54	数据角色账本及统计复算	Exp.1 可靠性
+V61	Stieger 交错划分记录效应 +42.42 pp	敏感性分析
+V65	Stieger 整块划分记录效应 +41.67 pp	Exp.1
+V27、V33	本地历史更新可行性	Exp.2、Exp.3
+V64	低校准预算下的历史收益	Exp.2
+V67	历史收益的条件依赖性	Exp.2
+V68	本人历史优于当天及匹配者历史	Exp.2
+V49、V60	结构化本地更新及曲率压缩	Exp.3
+V51、V58、V74	共享产物隔离及数据流验证	Exp.4
+
+3.3 B 类：方法选择依据
+实验	最终保留的技术决策
+V3–V10	固定有效 EEG 预处理及输入校验规则
+V11–V27	固定历史、训练、校准及评价数据角色
+V26	保留幅值和外围信号混杂检查
+V39	采用背景损失曲率近似
+V44、V44-A1	Dreyer 输入修正及任务效用配置
+V45	NETBCI 采用 TS-LR
+V48	保留共享编码器与本地头的学习位置对照
+V49	固定 OpenBMI Rank 8、Stieger Rank 16
+V55	排除原 NETBCI 无效配置
+V59–V60	固定 NETBCI Rank 4
+V63	固定背景正则及当天局部适配
+V56、V75	不再引入额外本地编码器适配
+V51、V58、V74	固定共享包与本地状态保护边界
+
+3.4 C 类：阴性与不确定结果
+实验	未获得支持或仍不明确的内容	最终处理
+E14E、E14F	神经教师相对公共教师的稳定优势	退出主线，保留局部成功及失败结果
+E15、EEG2 E3	神经监督稳定迁移至学生模型	归档
+V28	真实 fMRI 引导改善独立 LLM 任务	暂停
+V41	真实神经方向区别于匹配置换	保留工程与科学结果
+V29 WBCIC、V35	部分外部配置具有充分任务效用	不纳入核心矩阵
+V50	较近历史优于较早历史	不再扩展
+V55	原 NETBCI 配置通过全部效用门槛	保留失败原因
+V56	本地方法非劣于完整共享深层适配	正文必须报告
+V57	现有样本量足以确认跨日等效	保留样本量规划，放弃等效目标
+V67	NETBCI C8 历史收益得到明确确认	保留不确定结论
+V66、V69、V76	Mistral 神经特异性对应	暂停 LLM 来源归因研究
+V75	新残差适配器解决共享深层适配差距	停止增加适配结构
+
+V76 的意义尤为重要：独立数据中的神经响应一致性达到 0.695，但 Mistral 表征的偏相关为 −0.047，未通过神经特异性检验。
+
+这说明当前脑引导 LLM 技术路线尚不能建立充分的独立神经来源贡献证据，因此不具备进入后续来源隐私保护研究的条件。
+神经数据隐私研究_实验方法与原始结果总览_2026-11-26(3).md
+
+3.5 D 类：技术储备
+研究内容	最终处理
+THINGS EEG/MEG 数据管线	独立归档
+神经教师及 RDM 蒸馏	潜在后续研究储备
+Qwen、Mistral 神经引导	独立技术储备
+TH5–TH7、FX 视觉隐私研究	保留已有成果
+EEGPT、EEGNet	保存模型及旧配置
+WBCIC、Kumar、Wang、Zhou、Graz、Pan	保留外部数据接入与诊断能力
+V62 神经方向注入工程	不迁移至核心工程
+V74 Windows 参考应用	保留本地状态与保护边界验证
+
+由于最新可访问报告没有单独列出 V70–V73 的可核实正式结果，因此不为这些编号虚构实验内容。其余未逐一展开的历史运行，在工程归档时按照原始登记及实际状态补全索引。
+
+Phase 0 的结束意味着停止探索，而不是删除历史结果。
+
+四、正式研究总体框架
+Phase 0：前置研究
+数据验证、风险发现、方法筛选、阴性实验结束探索，归档已有成果
+
+
+RQ1 / H1Experiment 1：神经数据隐私暴露机制
+
+训练记录依赖、模型适配范围及会话风险边界。
+
+
+RQ2 / H2Experiment 2：隐私保护中的个性化效用约束
+
+本人历史价值、匹配者历史对照及纵向任务效用。
+
+
+RQ3 / H3aExperiment 3：效用保持型本地隐私保护方法
+
+背景损失摘要、本地历史学习、结构化近似与任务非劣。
+
+
+RQ3 / H3bExperiment 4：隐私保护有效性与适用边界
+
+共享产物隔离、本地数据流及学习位置限制。
+
+
+效用保持型神经数据隐私保护框架
+风险证据＋效用约束＋保护方法＋边界验证
+
+4.1 固定实验数据集
+数据集	原始规模	正式评价面板	任务及主要用途
+OpenBMI	54 人	36 人，18 对	两日运动想象；基础模型风险与保护方法
+Dreyer2023	87 人	50 人，25 对	单日运动想象；记录风险及适配机制
+Stieger2021	62 人	44 人，22 对	纵向运动想象；记录风险及历史保护
+NETBCI2026	19 人	12 人	四日运动想象与任务静息；纵向效用边界
+
+Stieger 整采集块隔离实验使用 21 对，而其他原协议使用 22 对。Dreyer 封存队列已经在 V47 中使用，后续完整复现不能重新计为全新独立验证。
+4.2 固定实验矩阵
+	OpenBMI	Dreyer	Stieger	NETBCI
+Exp.1 隐私风险				—
+Exp.2 效用约束		—		
+Exp.3 保护方法		—		
+Exp.4 保护验证		—		
+
+
+正式实验
+辅助检查— 不开展
+
+不同数据集承担不同研究任务，不要求每个数据集完成全部实验。
+
+NETBCI 的 Exp.4 仅保留配置及共享产物一致性辅助检查，不要求新增系统部署实验。
+4.3 固定模型
+模型	固定配置	研究作用
+CBraMod-Frozen	冻结预训练编码器	隐私风险对照
+CBraMod-Adapted	末三块及任务头适配	适配范围机制
+CBraMod-Background	背景参与者适配后冻结	隐私保护共享表示
+TS-LR	协方差切空间＋逻辑回归	传统解码及保护方法
+C3/C4	原固定传统对照	Dreyer 阴性及效用检查
+
+不再引入 EEGPT、EEGNet、其他基础模型、新 LoRA 或额外本地 Adapter。
+
+此外，需要核查 CBraMod 预训练数据来源。即使无法完整核验其预训练数据构成，仍可研究本次下游目标历史的隔离，但不能宣称整个模型生命周期从未接触目标参与者的数据。
+4.4 固定数据角色
+符号	含义
+\(D_B\)	背景参与者训练数据
+\(D_D\)	开发及配置选择数据
+\(H\)	目标个人历史记录
+\(W\)	同日未入训记录
+\(R\)	跨日未入训记录
+\(C\)	当天校准数据
+\(U\)	独立任务评价数据
+
+所有参与者划分、记录编号、预处理参数及随机种子均按原有效登记冻结，不重新划分。
+
+成员机制实验主要使用 H20/W20，本地历史保护实验主要使用 H40。统一数据接口不意味着强制统一不同实验的数据预算。
+
+五、Experiment 1：神经模型中的训练记录隐私暴露机制
+对应 H1｜隐私风险研究｜复现 V29b、V36、V46、V47、V61、V65
+5.1 研究目的
+本实验主要研究个人神经记录参与共享模型训练后，是否产生与实际训练记录相关的成员信号，以及这种信号受到模型适配范围的何种影响。
+
+研究目标不再是提高成员识别准确率，而是确定后续隐私保护所针对的风险及其形成条件。
+
+需要区分三类现象：
+现象	科学含义
+训练记录依赖	模型对实际参与训练的具体记录形成额外依赖
+会话相关差异	同日记录与跨日记录在模型行为上的差异
+参与者成员信号	特定评价接口下与参与者训练纳入有关的信息
+
+这三种现象不能直接等同于个人身份识别或原始神经数据重建。
+5.2 实验数据结构
+历史会话
+H20
+实际入训历史
+
+W20
+同日未入训历史
+
+
+保留原有互斥、类别平衡的记录分配。
+后续会话
+C
+当天校准
+
+U
+独立任务评价
+
+R20
+跨日未入训
+
+
+
+
+H−W
+训练记录重用相关的额外依赖
+
+W−R
+未入训记录的会话差异
+
+
+示意纵向实验数据角色。Dreyer 不设置跨日 R，具体校准及评价预算保留原登记。
+5.3 正式实验分组
+数据集	模型	数据角色	统计单位
+OpenBMI	CBraMod-Frozen、Adapted	H/W/R	18 对
+Dreyer	CBraMod-Frozen、Adapted、固定背景阴性对照	H/W	25 对
+Stieger	TS-LR	H/W/R	21 对
+
+Stieger 以 V65 整采集块隔离为主要结果，V61 交错记录分配作为敏感性分析。
+
+所有评价均限定于已有授权数据、匿名参与者人对及受控离线协议。
+5.4 核心评价指标
+设原实验协议中 H、W、R 的配对排序一致率分别为：
+\[
+A_H,\quad A_W,\quad A_R
+\]
+
+（1）训练记录依赖效应
+\[
+D_{\mathrm{reuse}}=A_H-A_W
+\]
+
+如果该差值明确大于零，说明实际参与训练的记录具有更强的成员相关信号。
+
+该指标反映已有受控协议下的记录依赖程度，不等同于开放环境中的成员识别准确率。
+（2）模型适配范围交互
+\[
+D_{\mathrm{adapt}}
+=
+D_{\mathrm{reuse}}^{\mathrm{adapted}}
+-
+D_{\mathrm{reuse}}^{\mathrm{frozen}}
+\]
+
+用于研究扩大模型适配范围是否增强记录依赖。
+
+需要注意，冻结与末三块适配同时改变了可训练参数数量、更新位置及优化空间，因此这一比较不能独立区分每个因素的作用。
+（3）未入训记录会话差异
+\[
+D_{\mathrm{session}}=A_W-A_R
+\]
+
+用于研究同日与跨日未入训记录的差异。
+
+该指标不仅受到个体信息稳定性的影响，也可能受到会话变化及采集条件影响。
+5.5 已有实验结果
+训练记录隐私相关效应
+H−W，单位为百分点，正值表示实际入训记录的成员相关信号更强。OpenBMI · V46
+
++26.85 pp
+
+
+
+
+Dreyer · V47
+
++46.00 pp
+
+
+
+
+Stieger · V61
+
++42.42 pp
+
+
+
+
+Stieger · V65
+
++41.67 pp
+
+
+
+
+V61 与 V65 为同一 Stieger 队列的不同记录分配协议，不是两个独立队列。
+Dreyer V47 的适配范围交互达到 +38.67 pp，支持扩大模型适配范围可能增强训练记录依赖。
+
+V38 进一步提供了隐私相关依赖与任务效用之间的证据：
+指标	末三块相对冻结的变化	判断
+历史敏感性 S	'+0.06786	区间支持增加
+历史任务收益 G	−0.00216	区间跨零
+跨日记录排序	−0.02778	区间跨零
+
+该结果说明额外历史敏感性不必然伴随明确的额外任务收益，但尚不能据此建立个体层面的隐私—效用因果关系。
+5.6 正式验收标准
+检验	验收要求
+K1：记录依赖	主要队列 H−W 效应及统计检验支持正向差异
+K2：适配范围	直接比较冻结与末三块的记录依赖差
+数据有效性	数据角色及记录划分符合原登记
+任务有效性	模型达到对应队列原任务效用门槛
+阴性对照	固定背景模型保持原有隔离行为
+跨会话分析	报告 W−R 效应及区间
+成员风险辅助分析	保留原固定模型 ROC-AUC 及评价条件
+
+不追求新的攻击算法或更高的成员识别性能，也不强行证明跨日成员风险等效于随机水平。
+
+本实验预期形成的科学贡献： 在 EEG 神经解码场景下，明确训练记录相关隐私信号的形成条件，为限制个人历史进入共享学习提供证据。
+
+六、Experiment 2：神经数据隐私保护中的个性化效用约束
+对应 H2｜保护必要性研究｜复现 V27、V64、V67、V68
+6.1 研究目的
+如果个人神经历史没有实际任务价值，减少或禁止历史数据使用可能已经足以解决部分共享暴露问题。
+
+但如果本人历史能够提供超出普通额外训练数据的预测收益，则隐私保护不应简单地排除所有个人信息利用。
+
+因此，本实验需要明确：
+
+个人神经历史在不增加当天校准预算的条件下，是否能够改善未来神经解码任务，以及这种改善是否与历史属于目标参与者有关。
+6.2 正式实验分组
+U0
+无历史基线
+固定背景模型
+
+不使用历史
+
+相同当天校准
+
+相同独立 U 集
+
+U1
+本人历史
+固定背景模型
+
+本人 H40
+
+相同当天校准
+
+相同独立 U 集
+
+U2
+匹配者历史
+固定背景模型
+
+他人 H40
+
+相同当天校准
+
+相同独立 U 集
+
+
+三个实验组固定背景表示、目标参与者、当天校准预算及任务评价记录。
+
+U1 与 U2 必须保持相同学习算法、历史数量、正则化及优化方式，避免历史来源与方法差异混杂。
+6.3 固定数据配置
+数据集	历史预算	主校准预算	评价设置
+OpenBMI	H40	C20	原独立 U 集
+Stieger	H40	C8	会话 3 后段 U40
+NETBCI	Day 1 H40	C8	Day 2/3/4 原 run 6
+
+Stieger 为本人历史来源特异价值的主要证据队列，OpenBMI 为辅助队列，NETBCI 用于纵向效用条件及不确定性验证。
+
+C20 作为 Stieger 和 NETBCI 已有辅助对照；C12 不再作为主要研究分支。
+6.4 主要评价指标
+采用 Brier 分数作为主要概率预测效用指标：
+\[
+L=\frac{1}{N}\sum_{i=1}^{N}(p_i-y_i)^2
+\]
+
+Brier 越低，表示预测概率的平方误差越小。
+（1）历史增量收益
+\[
+G_{\mathrm{history}}
+=
+L(U0)-L(U1)
+\]
+
+正值表示本人历史相对仅当天校准具有任务收益。
+（2）本人特异收益
+\[
+G_{\mathrm{specific}}
+=
+L(U2)-L(U1)
+\]
+
+正值表示本人历史优于等量匹配者历史。
+
+该指标支持历史来源相关的任务价值，但不能直接将其解释为纯粹的生理身份特征，因为设备条件、个人行为及其他稳定因素也可能产生影响。
+
+BA 和任务 AUROC 作为辅助效用指标。
+6.5 已有实验结果
+个人历史的条件性任务价值
+本人历史相对当天校准的 Brier 收益，正值表示预测概率误差减少。
+Stieger V68 本人历史相对等量匹配者历史+0.00350
+V64 与 V67 来自相同 NETBCI 评价人群的不同评分块，不构成独立队列复现。
+现有结果支持个人神经历史具有条件性任务价值，但效用大小较小且存在队列、会话及评分条件依赖性。
+
+因此，保留个人历史的动机必须以实际收益为依据，而不是假定所有个人历史都是必要的。
+6.6 正式验收标准
+结果	科学解释
+K3、K4 均支持	本人历史具有增量价值及来源相关价值
+仅 K3 支持	存在历史收益，但无法排除一般额外数据效应
+仅 K4 支持	存在历史来源差异，但未建立相对无历史的增量价值
+两项区间均跨零	当前条件下历史价值不确定
+本人历史表现更差	存在潜在负迁移或不利影响
+
+正式研究不要求所有队列均获得阳性结果。
+
+尤其不允许因为 NETBCI V67 未支持历史主效应，就重新选择日期、评分块、模型正则或校准数量。
+
+本实验预期形成的科学贡献： 将个人神经历史的实际任务价值纳入隐私保护研究，明确保护过程不能简单追求减少全部个人信息利用。
+
+七、Experiment 3：基于结构化背景损失摘要的效用保持型本地隐私保护
+对应 H3a｜核心保护方法｜复现 V27、V33、V39、V49、V60、V67、V68
+7.1 方法名称
+保留已有方法名称：
+
+Structured Privacy-Bounded Neural Personalization（S-PBNP）
+
+中文：基于结构化背景损失摘要的隐私边界约束神经个性化方法。
+
+该方法不以消除个人神经信息为目标，而是通过限制其学习位置与发布路径，实现目标个人历史的共享隔离，并尽量保留其任务价值。
+7.2 方法核心思想
+传统的集中式个性化适配需要同时使用背景训练数据与目标个人历史。
+
+但对于只需要服务于目标参与者本人任务的个人历史，这种集中式训练可能形成额外的共享数据依赖。
+
+S-PBNP 将学习过程划分为两个相互分离的部分。
+保护机制来自学习路径与发布边界的隔离；曲率摘要用于维持本地学习效用，而不是通过压缩本身提供隐私保证。
+7.3 数学方法
+Stage 1：共享背景模型训练
+设背景训练数据由 \(m\) 名参与者构成：
+\[
+D_B=\{D_1,D_2,\ldots,D_m\}
+\]
+
+首先训练共享特征编码器 \(F_\theta\)，随后冻结其参数。
+
+背景任务损失定义为：
+\[
+L_B^0(w)
+=
+\frac1m\sum_{j=1}^{m}L_j^0(w)
+\]
+
+其中 \(L_j^0\) 表示第 \(j\) 名背景参与者的未正则化任务损失。
+
+背景任务头为：
+\[
+w_B=
+\arg\min_w
+\left[
+L_B^0(w)+\frac{\lambda}{2}\|w\|_2^2
+\right]
+\]
+
+若全部参数采用相同的 L2 正则，则背景最优点满足：
+\[
+\nabla L_B^0(w_B)+\lambda w_B=0
+\]
+
+Stage 2：精确共享优化目标
+如果允许目标个人历史进入集中式任务头训练，并且所有参与者采用等权损失，则参考目标为：
+\[
+\begin{aligned}
+J_{\mathrm{exact}}(w)
+={}&mL_B^0(w)+L_H^0(w)\\
+&+\frac{(m+1)\lambda}{2}\|w\|_2^2
+\end{aligned}
+\]
+
+这一目标用于定义集中式效用参照。
+
+但是，实际保护方法不允许目标历史进入共享训练，也不要求设备获得完整背景数据。
+
+因此，需要在设备端近似背景损失。
+Stage 3：背景损失二阶近似
+令：
+\[
+w=w_B+\Delta
+\]
+
+对背景损失在 \(w_B\) 附近进行二阶 Taylor 展开：
+\[
+\begin{aligned}
+L_B^0(w_B+\Delta)\approx{}&
+L_B^0(w_B)\\
+&+\nabla L_B^0(w_B)^\top\Delta\\
+&+\frac12\Delta^\top H_B^0\Delta
+\end{aligned}
+\]
+
+其中：
+\[
+H_B^0=\nabla^2 L_B^0(w_B)
+\]
+
+代入背景最优条件及精确共享优化目标，去掉与 \(\Delta\) 无关的常数项，得到：
+\[
+\begin{aligned}
+J_{\mathrm{local}}(\Delta)
+={}&L_H^0(w_B+\Delta)\\
+&+\lambda w_B^\top\Delta\\
+&+\frac12\Delta^\top
+\left[
+mH_B^0+(m+1)\lambda I
+\right]\Delta
+\end{aligned}
+\]
+
+该式建立了设备本地优化与精确共享任务头重拟合之间的数学关系。
+Stage 4：结构化背景曲率近似
+全维 Hessian 的存储复杂度为：
+\[
+O(d^2)
+\]
+
+其中 \(d\) 为背景任务头的参数维度。
+
+为了降低背景知识摘要的存储开销，采用已有低秩加对角补偿结构：
+\[
+\widetilde H_B
+=
+U_r\Lambda_rU_r^\top
++
+\operatorname{Diag}(d_r)
+\]
+
+其中：
+\[
+d_r=
+\operatorname{diag}
+\left(
+H_B^0-U_r\Lambda_rU_r^\top
+\right)
+\]
+
+\(U_r\) 为保留的主要背景曲率方向，\(\Lambda_r\) 为对应谱系数，\(d_r\) 补偿未保留部分的对角曲率。
+
+最终背景曲率摘要存储复杂度为：
+\[
+O(dr+d+r)
+\]
+
+当 \(r\ll d\) 时，可以显著减少背景曲率的存储需求。
+Stage 5：本地隐私保护优化
+最终设备本地优化目标为：
+\[
+\boxed{
+\begin{aligned}
+\min_{\Delta_u}\quad&
+L_{H_u}^0(w_B+\Delta_u)\\
+&+\lambda w_B^\top\Delta_u\\
+&+\frac12\Delta_u^\top
+\left[
+m\widetilde H_B+(m+1)\lambda I
+\right]\Delta_u
+\end{aligned}
+}
+\]
+
+设备端仅使用本人历史和已经下发的背景损失摘要完成优化。
+
+得到个性化任务头：
+\[
+w_u=w_B+\Delta_u
+\]
+
+随后根据各数据集原有校准方法，使用当天 \(C\) 集进行本地校准，并在独立 \(U\) 集进行评价。
+
+整个个人历史学习过程不需要修改固定共享编码器。
+
+上述推导依赖背景参与者等权、损失归一化及正则方式等条件。若原实现不对截距进行正则化，则需要将 \(I\) 替换为对应正则掩码，并同步修正线性项。正式工程必须从 V27、V39、V49 原代码核对实际定义。
+7.4 理论近似误差分析
+在不增加新算法的前提下，可以保留已有理论近似分析。
+
+如果背景 Hessian 在局部区域具有 Lipschitz 连续性，常数为 \(M\)，则 Taylor 余项满足：
+\[
+|R_3(\Delta)|
+\leq
+\frac{M}{6}\|\Delta\|_2^3
+\]
+
+进一步考虑结构化曲率近似误差，可以得到：
+\[
+\begin{aligned}
+&|J_{\mathrm{exact}}(w_B+\Delta)
+-J_{\mathrm{local}}(\Delta)-c|\\
+\leq{}&
+\frac{mM}{6}\|\Delta\|_2^3\\
+&+\frac{m}{2}
+\|H_B^0-\widetilde H_B\|_2
+\|\Delta\|_2^2
+\end{aligned}
+\]
+
+其中 \(c\) 为与更新量无关的常数。
+
+该误差界说明本地近似主要受到两部分影响：
+
+背景损失在最优点附近的二阶截断误差，以及低秩曲率压缩引入的近似误差。
+
+这一理论结果属于特定数学假设下的目标函数近似分析，不是对整个神经网络、模型隐私或实际预测性能的全局保证。
+7.5 固定方法配置
+参数	OpenBMI	Stieger	NETBCI
+背景表示	CBraMod	TS-LR	TS-LR
+历史预算	H40	H40	H40
+主要校准	C20	C8	C8
+辅助校准	原协议	C20	C20
+曲率秩	8	16	4
+背景正则	原配置	0.001	0.01
+当天适配	原配置	原局部残差	原局部残差
+
+不再开展自动秩选择、历史剂量搜索、新的正则化设计或本地适配器扩展。
+7.6 正式方法对照
+编号	方法	研究作用
+P0	仅当天校准	无历史任务基线
+P1	精确共享任务头重拟合	集中式效用参考
+P2	各向同性本地约束	简单低成本对照
+P3	对角曲率本地更新	简单二阶近似
+P4	全维曲率本地更新	高精度曲率参照
+P5	低秩＋对角补偿本地更新	最终 S-PBNP
+
+P1 与 P5 必须保持相同固定背景表示、历史预算、当天校准及独立评价集合。
+
+P2、P3 属于匹配当前研究目标的内部消融对照，不能直接称为完整复现 EWC、Ditto 等已有算法。
+7.7 主要评价指标
+（1）任务效用联合非劣性
+定义：
+\[
+\Delta_{\mathrm{BA}}
+=
+\mathrm{BA}_{local}
+-
+\mathrm{BA}_{shared}
+\]
+
+\[
+\Delta_{\mathrm{Brier}}
+=
+\mathrm{Brier}_{local}
+-
+\mathrm{Brier}_{shared}
+\]
+
+保留原有非劣性界值：
+\[
+\operatorname{LCB}(\Delta_{\mathrm{BA}})
+>-0.03
+\]
+
+\[
+\operatorname{UCB}(\Delta_{\mathrm{Brier}})
+<0.005
+\]
+
+两项均通过，才可以支持本地方法相对于精确共享任务头的任务联合非劣性。
+（2）预测近似精度
+\[
+E_{\mathrm{pred}}
+=
+\frac1{|U|}
+\sum_{x\in U}
+|p_{local}(x)-p_{shared}(x)|
+\]
+
+验收标准为：
+\[
+\operatorname{UCB}(E_{\mathrm{pred}})
+\leq0.01
+\]
+
+（3）资源成本
+主要报告曲率摘要实际字节数、任务头求解时间、参数近似误差及能够核验的内存开销。
+7.8 已有资源压缩结果
+结构化背景曲率摘要存储成本
+OpenBMI
+全维曲率
+2.89 MB
+
+
+结构化曲率
+43.34 KB
+
+
+
+存储减少约 98.5%
+
+
+Stieger
+全维曲率
+7.17 MB
+
+
+结构化曲率
+128.92 KB
+
+
+
+存储减少约 98.2%
+
+
+NETBCI · Rank 4
+结构化曲率摘要
+1.872 KB
+
+以上仅统计曲率摘要，不包括完整模型、运行内存及端到端系统通信成本。
+7.9 方法创新成立的必要条件
+结构化曲率压缩不是本研究隐私保护能力的直接来源。
+
+保护能力来自目标个人历史不进入规定的共享学习过程；结构化曲率的作用是减少这种隔离可能造成的效用损失，并降低本地知识摘要的资源成本。
+
+因此，必须验证低秩结构的必要性。
+对照	验证内容
+P0 vs P5	使用个人历史是否有额外价值
+P1 vs P5	隐私隔离条件下能否保持共享任务头效用
+P2 vs P3/P5	曲率信息是否具有实际作用
+P3 vs P5	非对角曲率是否具有额外价值
+P4 vs P5	低秩压缩是否保持足够近似精度
+
+如果更简单的 P2 或 P3 同样达到全部效用与近似要求，并具有更低的资源成本，则低秩结构的额外算法贡献需要相应降低。
+
+本实验预期形成的科学贡献： 建立一种在目标个人历史不参与共享训练的条件下，利用背景任务知识完成本地个性化学习的保护方法，并量化其效用保持能力。
+
+八、Experiment 4：神经数据隐私保护有效性与适用边界
+对应 H3b｜核心保护验证｜复现 V48、V51、V56、V58、V74
+8.1 研究目的
+Experiment 3 主要验证本地方法是否能够保持任务效用，但效用保持本身不代表实现了隐私保护。
+
+Experiment 4 需要进一步验证以下问题：
+
+目标个人历史是否真正与规定的共享学习及发布流程隔离？本地保护方法能够替代哪类共享适配方式？现有保护边界是否覆盖模型发布、本地状态及系统数据流？
+
+该实验是整个隐私保护研究最终成立的重要环节。
+8.2 威胁模型与隐私保护范围
+项目	正式定义
+保护对象	新增目标参与者的个人神经历史
+保护信息	历史内容、历史训练使用关系及个人适配状态
+潜在风险	共享学习产生的训练记录相关成员信号
+共享可见产物	背景编码器、背景任务头、结构化背景损失摘要
+共享可见接口	规定的固定背景模型预测接口
+本地可信边界	个人历史、当天校准、个人任务头及本地状态
+保护机制	目标历史与共享学习路径分离
+核心保护要求	目标个人历史变化不影响规定共享产物
+效用要求	保持相对精确共享任务头重拟合的任务非劣性
+
+不在当前保护范围内的风险
+包括背景训练参与者的隐私、个人设备遭到入侵、未经授权的本地模型访问、真实遥测旁路、外部第三方系统数据泄露，以及模型原始预训练阶段已经存在的目标个人信息。
+
+因此，本研究提供的是特定共享边界下的目标个人历史隔离保护，而不是整个神经解码系统的全面隐私保证。
+8.3 子实验 4A：学习位置与隐私暴露关系
+仅在 OpenBMI 上复现原有 M0–M3 学习位置对照。
+M0
+冻结基础模型
+冻结预训练编码器
+
+
+共享任务头
+
+目标历史参与共享任务头或编码器适配
+
+M1
+共享深层适配
+末三块适配编码器
+
+
+共享任务头
+
+目标历史参与共享任务头或编码器适配
+
+M2
+共享任务头适配
+固定背景编码器
+
+
+共享任务头
+
+目标历史参与共享任务头或编码器适配
+
+M3
+本地隐私保护
+固定背景编码器
+
+
+本地任务头
+
+目标历史仅用于本地学习
+
+
+主要比较如下：
+比较	科学目的
+M1 vs M0	研究扩大适配范围的效用与记录依赖变化
+M2 vs M1	研究固定背景表示的效用限制
+M3 vs M2	研究本地保护能否替代共享任务头适配
+M3 vs M1	研究本地保护能否替代完整共享深层适配
+
+已有实验结果
+比较	当前结果
+M3 vs M2	联合非劣通过
+M3 vs M1	联合非劣未通过
+V75 残差适配 vs M3	Brier 改善未明确确认
+V75 残差适配 vs M1	联合非劣仍未通过
+
+其中，V56 中 M3 相对 M1：
+指标	差异	对应区间边界	非劣要求
+BA	−1.67 pp	下界 −3.90 pp	下界高于 −3 pp
+Brier	'+0.00462	上界 +0.01045	上界低于 +0.005
+
+两项均未满足联合非劣要求。
+
+最新 V75 增加本地残差适配后也未解决这一问题。
+
+因此，最终研究保留固定背景编码器，不再增加新的本地表征适配结构。
+
+这一限制必须在正文中报告，因为它明确了保护方法所适用的共享学习条件。
+8.4 子实验 4B：共享产物不依赖性
+定义共享发布产物：
+\[
+A_B=\mathcal A(D_B,\omega)
+\]
+
+其中 \(D_B\) 表示固定背景数据，\(\omega\) 表示固定模型配置、随机条件及共享训练环境。
+
+对于目标参与者的任意两个允许的个人历史 \(H_u,H'_u\)，如果两者均不参与共享训练、预处理统计、模型选型、共享校准及状态回传，则：
+\[
+\boxed{
+A_B(H_u)=A_B(H'_u)
+}
+\]
+
+这一关系是本研究的核心隐私隔离条件。
+
+进一步定义共享产物差异：
+\[
+D_{\mathrm{shared}}
+=
+d\left(A_B(H_u),A_B(H'_u)\right)
+\]
+
+其中 \(d\) 表示针对规定共享产物的差异度量。
+
+保护要求为：
+\[
+D_{\mathrm{shared}}=0
+\]
+
+对于固定共享模型预测接口，要求同一固定评价输入下的共享预测保持不变：
+\[
+p_B(x;H_u)=p_B(x;H'_u)
+\]
+
+该条件强调，目标历史能够改变个人设备上的本地模型，但不应改变固定共享模型。
+在背景数据、运行条件与共享访问接口固定的前提下，对目标历史变化进行隔离验证。
+理论保护声明
+若共享产物严格由背景数据与独立运行条件决定，则有条件互信息关系：
+\[
+I(H_u;A_B\mid D_B)=0
+\]
+
+这一关系仅成立于定义的架构及独立性条件下。
+
+它不意味着背景数据本身不会包含与目标个人相关的信息，也不意味着整个系统满足无条件的零信息泄露。
+
+因此，论文可以讨论共享产物对新增目标历史的结构性不依赖，但不能将其描述为普遍的参与者级差分隐私或完整身份匿名化保证。
+8.5 子实验 4C：系统数据流与隐私保护边界验证
+复用 V51、V58、V74 中已经建立的离线测试及合成标记检查。
+验证项目	验收条件
+共享包完整性	个人历史变化前后文件指纹一致
+共享模型预测	固定探针预测最大漂移为零
+本地状态更新	个人历史能够改变本地适配结果
+状态持久化	支持正常保存及重新加载
+状态清除	能够清除规定的本地适配器状态
+中断恢复	恢复结果符合原协议
+重复提交	保持幂等性
+模拟同步	不产生被禁止的历史或适配状态回传
+网络隔离	已测试离线路径符合通信边界
+
+已有 V74 的结果支持离线共享包隔离、中断恢复、模拟同步检查和 Windows 参考应用的本地状态处理，但生产设备、真实遥测及背景参与者风险尚未完成验证。
+神经数据隐私研究_实验方法与原始结果总览_2026-11-26(3).md
+
+8.6 最终隐私保护评价体系
+正式保护结论必须由三个不同层次组成。
+评价层次	核心指标	研究作用
+风险依据	H−W、适配交互、已有成员 ROC-AUC	证明为什么需要限制共享训练
+保护能力	共享产物不依赖性、数据流隔离	验证目标历史不会改变规定共享产物
+效用保持	BA、Brier 联合非劣、预测 MAE	验证保护是否造成不可接受的效用损失
+
+需要特别注意，现有实验没有建立所有潜在成员风险的统一前后变化曲线。
+
+因此，不能用共享包不变直接宣称开放环境中的成员推断准确率降低了某一百分比，也不应把无预测漂移与任意形式的隐私风险为零等同起来。
+8.7 正式验收标准
+只有同时满足以下三个条件，才能形成完整的效用保持型隐私保护结论：
+\[
+\left\{
+\begin{aligned}
+&D_{\mathrm{shared}}=0\\
+&\operatorname{LCB}(\Delta_{\mathrm{BA}})>-0.03\\
+&\operatorname{UCB}(\Delta_{\mathrm{Brier}})<0.005\\
+&\operatorname{UCB}(E_{\mathrm{pred}})\leq0.01
+\end{aligned}
+\right.
+\]
+
+第一项为共享隔离条件，后两类指标分别为联合任务非劣与预测近似条件。
+
+这些条件仅在规定评价接口、固定背景模型及受测系统路径下解释。
+
+本实验预期形成的科学贡献： 为神经数据保护建立可核验的共享边界，明确在何种学习条件下能够实现目标历史隔离及效用保持，以及该保护方法不能覆盖哪些风险。
+
+九、统一隐私保护评价与统计分析体系
+9.1 六项主要科学检验
+编号	科学检验	主要证据队列	对应假设
+K1	H−W 训练记录依赖效应	Dreyer，OpenBMI、Stieger 支持	H1
+K2	模型适配范围对记录依赖的交互	Dreyer，OpenBMI 辅助	H1
+K3	本人历史相对无历史的任务收益	Stieger	H2
+K4	本人历史相对匹配者历史的任务收益	Stieger	H2
+K5	本地保护方法联合非劣及预测近似	Stieger，OpenBMI、NETBCI 补充	H3a
+K6	目标个人历史与规定共享产物隔离	OpenBMI、Stieger	H3b
+
+K1–K6 构成正式研究的全部主要检验。
+
+其他指标仅作为辅助分析、机制解释、适用条件或技术消融，不再衍生新的核心假设。
+9.2 统一评价指标
+评价维度	主要指标	辅助指标
+隐私暴露机制	H−W	适配交互、W−R、连续损失差
+固定模型成员风险	原协议成员 ROC-AUC	评价访问条件及区间
+个性化效用	Brier 历史收益	BA、任务 AUROC
+隐私隔离	共享产物不依赖性	共享预测漂移
+保护后任务性能	BA/Brier 联合非劣	参数与优化目标误差
+保护方法近似	预测 MAE	参数距离
+资源成本	摘要实际字节数	求解时间、内存
+系统保护边界	数据流隔离	恢复、清除、同步
+
+其中任务 AUROC 与成员 ROC-AUC 是两个不同性质的指标，不能进行直接比较。
+9.3 独立统计单位
+数据集	统计单位
+OpenBMI	18 个固定人对
+Dreyer	25 个固定人对
+Stieger	21 或 22 个固定人对
+NETBCI	12 名参与者；匹配历史分析为 6 个人对
+
+所有随机种子、重复试次及同一参与者的多日数据均先在相应独立统计单位内汇总。
+
+例如：
+\[
+18\text{ 个人对}\times3\text{ 个种子}
+\neq54\text{ 个独立人对}
+\]
+
+同时，应明确统计结论以固定背景模型和原训练组成作为条件。共享背景训练本身带来的总体不确定性，不能仅通过评价人对的重抽样完全反映。
+9.4 统一置信区间及主要检验
+分析类型	正式统计方法
+连续配对差异	参与者级或人对级配对分析
+有界比例效应	独立统计单位级 bootstrap
+小样本敏感性	保留原配对 t 区间及重抽样结果
+多日数据	先在参与者内部汇总
+历史结果展示	保留原有 97.5% 双侧区间
+主要统计检验	固定方向的单侧检验
+多重比较控制	K1–K5 采用 Holm 校正
+K5 联合非劣	交并检验
+K6 共享隔离	结构性与工程验收
+
+对于 K5，BA、Brier 和预测近似分别构成三个必要条件，可以将其组成检验的最大 p 值作为整体交并检验的 p 值，再与 K1–K4 一同进行主要检验族的 Holm 校正。
+
+主要检验族的整体显著性水平建议固定为：
+\[
+\alpha=0.05
+\]
+
+原历史 97.5% 双侧区间继续用于效应量展示和历史协议复核，但不能直接代替经过多重比较调整的正式统计判断。
+
+另外，−3 pp、+0.005、0.01 属于本研究沿用的操作性非劣及近似界值，并非已经获得临床普遍认可的阈值。
+9.5 统一结果判定
+结果状态	含义
+Supported	主要科学检验获得支持
+Non-inferior	达到固定非劣要求
+Isolation passed	规定共享隔离条件通过
+Inconclusive	当前证据不足以明确判断
+Not supported	未达到预先固定的科学标准
+Not applicable	对当前队列不适用
+Blocked	数据、配置或工程条件不足
+Invalid	存在已确认的软件或数据错误
+
+不将统计不显著解释为不存在效应，也不将非劣性未通过直接解释为方法一定更差。
+9.6 不再追求跨日风险等效结论
+V57 已经估计，在原有条件下，如果需要同时确认三项 ±5 pp 等效性，可能需要约 102 个完整人对。
+
+现有研究不增加数据集及参与者，因此不再将证明跨日风险等效作为正式研究目标。
+
+W−R 只报告真实效应、统计区间及不确定性范围。
+9.7 区分计算复现与独立确认
+本研究的正式科学假设已经利用 V1–V76 的结果形成，因此不能将后续原数据复跑描述为完全独立的新预注册研究。
+工作方式	科学定位
+重新计算保存的预测结果	统计复算
+从旧检查点重新评价	检查点复现
+使用原数据及配置重新训练	计算复现
+整合不同现有队列的证据	跨队列证据整合
+使用此前从未查看的评价材料	新确认性验证
+
+Dreyer 与 Stieger 被选为部分主要证据队列，也是依据已有结果及数据结构作出的事后收敛决定。
+
+因此，冻结协议能够提高复现性、减少继续选择有利结果的空间，但不能消除此前探索及选型带来的统计偏倚。
+
+十、正式研究工程框架
+后续建立独立的 neuroprivacy_final 工程，不再以 V77、V78 等探索编号组织实验。
+10.1 推荐项目结构
+neuroprivacy_final/
+│
+├── README.md
+├── pyproject.toml
+├── requirements.lock
+│
+├── configs/
+│   ├── protocol.yaml
+│   ├── statistics.yaml
+│   ├── acceptance.yaml
+│   ├── privacy_boundary.yaml
+│   │
+│   ├── datasets/
+│   │   ├── openbmi.yaml
+│   │   ├── dreyer.yaml
+│   │   ├── stieger.yaml
+│   │   └── netbci.yaml
+│   │
+│   └── models/
+│       ├── cbramod.yaml
+│       └── ts_lr.yaml
+│
+├── manifests/
+│   ├── dataset_registry.json
+│   ├── participant_roles.csv
+│   ├── trial_roles.csv
+│   ├── checkpoint_registry.json
+│   ├── legacy_result_mapping.json
+│   └── protocol_deviations.json
+│
+├── src/
+│   └── neuroprivacy/
+│       ├── data/
+│       ├── preprocessing/
+│       ├── models/
+│       ├── personalization/
+│       ├── privacy_boundary/
+│       ├── evaluation/
+│       ├── statistics/
+│       └── reporting/
+│
+├── experiments/
+│   ├── exp1_privacy_exposure.py
+│   ├── exp2_utility_constraint.py
+│   ├── exp3_privacy_preserving_learning.py
+│   └── exp4_privacy_boundary.py
+│
+├── tests/
+├── checkpoints/
+├── results/
+├── figures/
+│
+└── archive/
+    └── phase0/
+
+
+10.2 工程模块设计
+模块	主要功能
+data	四个固定数据集统一读取
+preprocessing	原信号预处理及配置冻结
+models	CBraMod、TS-LR 统一接口
+personalization	集中式参考及本地曲率更新
+privacy_boundary	共享产物与本地状态隔离检查
+evaluation	固定风险及任务效用评价
+statistics	独立统计单位分析及主要检验
+reporting	生成统一统计表及论文图表
+archive	旧运行、阴性结果与错误记录
+
+核心工程需要将训练数据、背景模型发布产物及个人本地状态明确分离。
+
+论文复现中使用的敏感记录及个体级结果，应根据原数据许可限制访问，不将受控神经数据或可关联的个人信息直接纳入公开复现包。
+10.3 固定研究协议配置
+project:
+  name: neuroprivacy_final
+  protocol_version: "1.0"
+  research_focus: neural_data_privacy
+  phase0_status: closed
+  phase: frozen_reproduction
+  evidence_cutoff: "2026-11-26"
+
+scope:
+  datasets:
+    - OpenBMI
+    - Dreyer2023
+    - Stieger2021
+    - NETBCI
+
+  model_families:
+    - CBraMod
+    - TS-LR
+
+  allow_new_datasets: false
+  allow_new_models: false
+  allow_new_privacy_attacks: false
+  allow_new_protection_algorithms: false
+  allow_hyperparameter_search: false
+  allow_exploratory_extension: false
+
+hypotheses:
+  H1: training_record_exposure
+  H2: personalization_utility_constraint
+  H3: utility_preserving_privacy_isolation
+
+experiments:
+  exp1_privacy_exposure:
+    enabled: true
+    datasets:
+      - OpenBMI
+      - Dreyer2023
+      - Stieger2021
+
+  exp2_utility_constraint:
+    enabled: true
+    datasets:
+      - OpenBMI
+      - Stieger2021
+      - NETBCI
+
+  exp3_privacy_preserving_learning:
+    enabled: true
+    datasets:
+      - OpenBMI
+      - Stieger2021
+      - NETBCI
+
+  exp4_privacy_boundary:
+    enabled: true
+    datasets:
+      - OpenBMI
+      - Stieger2021
+
+privacy:
+  protected_object: target_personal_history
+
+  shared_encoder_frozen: true
+  target_history_in_shared_training: false
+  target_history_in_shared_preprocessing: false
+  target_history_in_shared_selection: false
+
+  allow_local_history_learning: true
+  allow_local_calibration: true
+
+  target_history_upload: false
+  personal_model_update_upload: false
+
+  require_shared_artifact_invariance: true
+
+  claim_formal_differential_privacy: false
+  claim_background_participant_privacy: false
+  claim_complete_device_security: false
+
+personalization:
+  method: S-PBNP
+
+  curvature:
+    OpenBMI:
+      rank: 8
+
+    Stieger2021:
+      rank: 16
+
+    NETBCI:
+      rank: 4
+
+statistics:
+  historical_ci_level: 0.975
+  primary_family_alpha: 0.05
+  multiplicity_adjustment: holm
+  seed_aggregation: within_statistical_unit
+
+  noninferiority:
+    ba_margin: -0.03
+    brier_margin: 0.005
+
+  approximation:
+    probability_mae_upper: 0.01
+
+execution:
+  preserve_original_partitions: true
+  preserve_negative_results: true
+
+  automatic_experiment_extension: false
+  automatic_reselection_on_failure: false
+
+  require_data_manifest: true
+  require_resolved_config: true
+  require_provenance: true
+  require_protocol_deviation_log: true
+
+
+此配置属于最终工程设计模板，并不表示已有代码已经实现了其中所有保护限制。
+
+原始参与者编号、试次编号、种子、训练参数、损失定义及模型版本必须从有效历史运行中提取，不得使用示例参数替代。
+10.4 四种固定运行模式
+模式	功能
+audit	数据、配置、权重及保护边界核查
+replay	原有结果及检查点复算
+reproduce	原数据及固定配置完整复现
+report	生成论文统计结果及图表
+
+目标运行命令：
+# 核查数据、模型及隐私保护协议
+python -m neuroprivacy audit
+
+# 复算已有核心实验
+python -m neuroprivacy replay --experiment all
+
+# 完整复现正式实验
+python -m neuroprivacy reproduce --experiment all
+
+# 生成最终统计表及论文图表
+python -m neuroprivacy report
+
+
+这些命令为待实现的标准化入口，不是当前已验证可以运行的程序。
+10.5 正式结果产物
+results/
+└── exp3_privacy_preserving_learning/
+    └── stieger/
+        ├── resolved_config.yaml
+        ├── data_manifest.json
+        ├── checkpoint_manifest.json
+        ├── predictions.csv
+        ├── participant_metrics.csv
+        ├── paired_effects.csv
+        ├── confidence_intervals.json
+        ├── hypothesis_tests.json
+        ├── resource_metrics.json
+        ├── privacy_boundary.json
+        ├── decision.json
+        └── provenance.json
+
+
+个体级预测及参与者结果属于受控研究产物，不默认对外公开。公开报告主要由允许发布的聚合统计、配置说明及复现代码生成。
+
+十一、正式阶段允许补充的内容
+Phase 0 已结束，但仍需要补齐正式论文中的必要证据链。
+
+这些工作不属于新的探索性研究。
+11.1 必要补齐任务
+优先级	工作	目的
+P0	核查全部数据角色及模型来源	确保隐私保护对象定义正确
+P0	统一复算 H−W 及适配交互	建立风险证据
+P0	补齐本人、他人及无历史的等预算对照	建立效用约束
+P0	补齐原有曲率方法对照	验证保护方法必要性
+P0	复播共享产物及本地数据流检查	验证保护机制
+P1	统一主要统计检验及多重比较	提高证据严谨性
+P1	测量既有方法存储及求解成本	完善保护方法评价
+P1	整理全部阴性结果与协议偏离	明确研究适用边界
+
+11.2 不再开展的研究
+不再新增 V77 之后的探索性实验，不增加数据集、基础模型、新的隐私攻击方法、新保护算法、历史日期组合、校准剂量搜索或额外本地表征适配。
+
+脑引导 LLM、视觉神经教师蒸馏及跨模态隐私传播均退出当前论文主线。
+
+如果正式复现过程中出现阴性结果，应首先核查是否存在数据或实现错误。若配置与原协议一致，则保留阴性结果，不重新调参寻找阳性结论。
+
+十二、最终论文结构与图表设计
+12.1 Introduction 组织方式
+建议按照五个段落组织论文引言。
+段落	核心内容
+第一段：研究背景	神经解码模型的发展与个人神经数据的隐私敏感性
+第二段：风险问题	神经数据参与共享学习产生的模型层面隐私风险
+第三段：已有研究不足	现有隐私保护、成员风险及本地学习方法的研究进展与局限
+第四段：核心科学矛盾	个人历史既具有隐私敏感性，又具有潜在个性化任务价值
+第五段：本文研究	提出效用保持型本地隐私保护框架及三个科学问题
+
+论文开篇应从神经数据隐私保护切入，而不是先介绍如何提高 EEG 解码准确率。
+12.2 Results 章节结构
+章节	对应实验	核心内容
+Record-dependent privacy exposure in neural decoding models	Exp.1	隐私暴露及形成条件
+Utility constraints of protecting personal neural history	Exp.2	隐私保护的个性化效用约束
+Utility-preserving local learning for neural data privacy	Exp.3	核心隐私保护方法
+Privacy isolation and applicability boundaries	Exp.4	保护能力及适用限制
+
+12.3 正文主图设计
+建议设置四张主要结果图。
+
+Figure 1｜神经数据隐私暴露机制
+
+a. H/W/R 数据角色
+
+b. 跨队列记录依赖效应
+
+c. 模型适配范围交互
+
+d. 同日与跨日风险边界
+
+
+
+
+Figure 2｜隐私保护的个性化效用约束
+
+a. 本人、他人及无历史对照
+
+b. 历史增量收益
+
+c. 本人特异收益
+
+d. 纵向适用条件与不确定性
+
+
+
+
+Figure 3｜效用保持型神经数据隐私保护方法
+
+a. S-PBNP 保护架构
+
+b. 结构化背景损失近似
+
+c. 任务非劣及预测近似
+
+d. 曲率消融与资源成本
+
+
+
+
+Figure 4｜隐私保护有效性及适用边界
+
+a. M0–M3 学习位置对照
+
+b. 共享产物不依赖性
+
+c. 本地数据流及状态检查
+
+d. 完整共享深层适配限制
+
+
+以上为论文图表布局示意，其中缩略图不代表新增实验数据。
+建议另外设置两张正文表格。
+表格	内容
+Table 1	四个数据集、模型及主要隐私与效用结果
+Table 2	保护方法对照、联合非劣、预测近似及资源成本
+
+其余预处理、历史剂量辅助结果、完整配置、敏感性分析及阴性结果进入 Supplementary Information。
+12.4 Methods 章节
+Methods 主要包含：
+小节	内容
+Datasets and preprocessing	数据来源及预处理
+Neural decoding models	固定模型配置
+Privacy evaluation protocol	隐私评价条件与数据角色
+Personal history utility	历史效用实验
+Structured local personalization	S-PBNP 方法及数学推导
+Threat model and privacy boundary	保护对象、共享接口及隔离条件
+Statistical analysis	主要检验、非劣及统计单位
+Reproducibility	冻结配置、数据许可及复现流程
+
+12.5 Discussion 组织方式
+重点讨论隐私风险的记录依赖性、个人神经信息的任务价值、学习位置分离的保护意义、背景损失摘要的技术贡献，以及本地保护方法无法替代完整共享深层适配的条件。
+
+同时必须讨论样本量限制、重复使用评价队列、潜在预训练数据重叠、缺乏全面系统安全验证和非劣界值的操作性选择。
+
+不需要在正文中大篇幅介绍退出主线的脑引导 LLM 研究。
+
+十三、正式研究执行流程与验收清单
+13.1 正式执行流程
+#chatgpt-mermaid-_r_499_{font-family:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";font-size:16px;fill:rgb(237, 237, 237);}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#chatgpt-mermaid-_r_499_ .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#chatgpt-mermaid-_r_499_ .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#chatgpt-mermaid-_r_499_ .error-icon{fill:rgb(48, 48, 48);}#chatgpt-mermaid-_r_499_ .error-text{fill:rgb(237, 237, 237);stroke:rgb(237, 237, 237);}#chatgpt-mermaid-_r_499_ .edge-thickness-normal{stroke-width:1px;}#chatgpt-mermaid-_r_499_ .edge-thickness-thick{stroke-width:3.5px;}#chatgpt-mermaid-_r_499_ .edge-pattern-solid{stroke-dasharray:0;}#chatgpt-mermaid-_r_499_ .edge-thickness-invisible{stroke-width:0;fill:none;}#chatgpt-mermaid-_r_499_ .edge-pattern-dashed{stroke-dasharray:3;}#chatgpt-mermaid-_r_499_ .edge-pattern-dotted{stroke-dasharray:2;}#chatgpt-mermaid-_r_499_ .marker{fill:rgb(175, 175, 175);stroke:rgb(175, 175, 175);}#chatgpt-mermaid-_r_499_ .marker.cross{stroke:rgb(175, 175, 175);}#chatgpt-mermaid-_r_499_ svg{font-family:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";font-size:16px;}#chatgpt-mermaid-_r_499_ p{margin:0;}#chatgpt-mermaid-_r_499_ .label{font-family:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";color:rgb(237, 237, 237);}#chatgpt-mermaid-_r_499_ .cluster-label text{fill:rgb(237, 237, 237);}#chatgpt-mermaid-_r_499_ .cluster-label span{color:rgb(237, 237, 237);}#chatgpt-mermaid-_r_499_ .cluster-label span p{background-color:transparent;}#chatgpt-mermaid-_r_499_ .label text,#chatgpt-mermaid-_r_499_ span{fill:rgb(237, 237, 237);color:rgb(237, 237, 237);}#chatgpt-mermaid-_r_499_ .node rect,#chatgpt-mermaid-_r_499_ .node circle,#chatgpt-mermaid-_r_499_ .node ellipse,#chatgpt-mermaid-_r_499_ .node polygon,#chatgpt-mermaid-_r_499_ .node path{fill:rgb(19, 33, 54);stroke:rgb(31, 78, 148);stroke-width:1px;}#chatgpt-mermaid-_r_499_ .rough-node .label text,#chatgpt-mermaid-_r_499_ .node .label text,#chatgpt-mermaid-_r_499_ .image-shape .label,#chatgpt-mermaid-_r_499_ .icon-shape .label{text-anchor:middle;}#chatgpt-mermaid-_r_499_ .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#chatgpt-mermaid-_r_499_ .rough-node .label,#chatgpt-mermaid-_r_499_ .node .label,#chatgpt-mermaid-_r_499_ .image-shape .label,#chatgpt-mermaid-_r_499_ .icon-shape .label{text-align:center;}#chatgpt-mermaid-_r_499_ .node.clickable{cursor:pointer;}#chatgpt-mermaid-_r_499_ .root .anchor path{fill:rgb(175, 175, 175)!important;stroke-width:0;stroke:rgb(175, 175, 175);}#chatgpt-mermaid-_r_499_ .arrowheadPath{fill:rgb(175, 175, 175);}#chatgpt-mermaid-_r_499_ .edgePath .path{stroke:rgb(175, 175, 175);stroke-width:1px;}#chatgpt-mermaid-_r_499_ .flowchart-link{stroke:rgb(175, 175, 175);fill:none;}#chatgpt-mermaid-_r_499_ .edgeLabel{background-color:rgb(14, 14, 14);text-align:center;}#chatgpt-mermaid-_r_499_ .edgeLabel p{background-color:rgb(14, 14, 14);}#chatgpt-mermaid-_r_499_ .edgeLabel rect{opacity:0.5;background-color:rgb(14, 14, 14);fill:rgb(14, 14, 14);}#chatgpt-mermaid-_r_499_ .labelBkg{background-color:rgba(14, 14, 14, 0.5);}#chatgpt-mermaid-_r_499_ .cluster rect{fill:rgb(48, 48, 48);stroke:rgba(255, 255, 255, 0.15);stroke-width:1px;}#chatgpt-mermaid-_r_499_ .cluster text{fill:rgb(237, 237, 237);}#chatgpt-mermaid-_r_499_ .cluster span{color:rgb(237, 237, 237);}#chatgpt-mermaid-_r_499_ div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";font-size:12px;background:rgb(48, 48, 48);border:1px solid rgba(255, 255, 255, 0.15);border-radius:2px;pointer-events:none;z-index:100;}#chatgpt-mermaid-_r_499_ .flowchartTitleText{text-anchor:middle;font-size:18px;fill:rgb(237, 237, 237);}#chatgpt-mermaid-_r_499_ rect.text{fill:none;stroke-width:0;}#chatgpt-mermaid-_r_499_ .icon-shape,#chatgpt-mermaid-_r_499_ .image-shape{background-color:rgb(14, 14, 14);text-align:center;}#chatgpt-mermaid-_r_499_ .icon-shape p,#chatgpt-mermaid-_r_499_ .image-shape p{background-color:rgb(14, 14, 14);padding:2px;}#chatgpt-mermaid-_r_499_ .icon-shape .label rect,#chatgpt-mermaid-_r_499_ .image-shape .label rect{opacity:0.5;background-color:rgb(14, 14, 14);fill:rgb(14, 14, 14);}#chatgpt-mermaid-_r_499_ .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#chatgpt-mermaid-_r_499_ .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#chatgpt-mermaid-_r_499_ .node .neo-node{stroke:rgb(31, 78, 148);}#chatgpt-mermaid-_r_499_ [data-look="neo"].node rect,#chatgpt-mermaid-_r_499_ [data-look="neo"].cluster rect,#chatgpt-mermaid-_r_499_ [data-look="neo"].node polygon{stroke:url(#chatgpt-mermaid-_r_499_-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#chatgpt-mermaid-_r_499_ [data-look="neo"].swimlane.cluster rect{filter:none;}#chatgpt-mermaid-_r_499_ [data-look="neo"].node path{stroke:url(#chatgpt-mermaid-_r_499_-gradient);stroke-width:1px;}#chatgpt-mermaid-_r_499_ [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#chatgpt-mermaid-_r_499_ [data-look="neo"].node .neo-line path{stroke:rgb(31, 78, 148);filter:none;}#chatgpt-mermaid-_r_499_ [data-look="neo"].node circle{stroke:url(#chatgpt-mermaid-_r_499_-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#chatgpt-mermaid-_r_499_ [data-look="neo"].node circle .state-start{fill:#000000;}#chatgpt-mermaid-_r_499_ [data-look="neo"].icon-shape .icon{fill:url(#chatgpt-mermaid-_r_499_-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#chatgpt-mermaid-_r_499_ [data-look="neo"].icon-shape .icon-neo path{stroke:url(#chatgpt-mermaid-_r_499_-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#chatgpt-mermaid-_r_499_ .node text{font-size:14px;font-weight:600;letter-spacing:normal;fill:rgb(153, 206, 255);}#chatgpt-mermaid-_r_499_ .edgeLabels text{font-size:13px;font-weight:600;letter-spacing:-0.08px;fill:rgb(153, 206, 255);}#chatgpt-mermaid-_r_499_ .node tspan[font-weight="normal"],#chatgpt-mermaid-_r_499_ .edgeLabels tspan[font-weight="normal"]{font-weight:600;}#chatgpt-mermaid-_r_499_ .edgeLabel .label rect{opacity:1;rx:13px;ry:13px;fill:rgb(0, 14, 26);stroke:rgb(26, 62, 95);stroke-width:1px;}#chatgpt-mermaid-_r_499_ .node rect,#chatgpt-mermaid-_r_499_ .node circle,#chatgpt-mermaid-_r_499_ .node ellipse,#chatgpt-mermaid-_r_499_ .node polygon,#chatgpt-mermaid-_r_499_ .node path{fill:rgb(0, 40, 77);stroke:rgba(255, 255, 255, 0.1);stroke-width:1px;}#chatgpt-mermaid-_r_499_ .node rect{rx:16px;ry:16px;}#chatgpt-mermaid-_r_499_ .mermaid-decision .label-container{fill:rgb(0, 14, 26);stroke:rgb(26, 62, 95);stroke-dasharray:2,2;}#chatgpt-mermaid-_r_499_ .edgePaths .flowchart-link{stroke:rgb(175, 175, 175);stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;}#chatgpt-mermaid-_r_499_ .marker{fill:rgb(175, 175, 175);stroke:rgb(175, 175, 175);}#chatgpt-mermaid-_r_499_ :root{--mermaid-font-family:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";}冻结 Final Protocol 1.0Phase 0 全部成果归档提取固定数据与模型配置建立统一核心实验工程原有结果复算及一致性核查Exp.1 隐私暴露机制Exp.2 个性化效用约束Exp.3 本地隐私保护方法Exp.4 保护能力及边界K1–K6 统一统计检验生成论文图表与复现材料正式研究结果定型
+
+
+
+
+
+四组正式实验均应具有明确的结果状态，但不要求所有实验最终得到阳性结果。
+13.2 正式研究验收清单
+正式研究验收进度0/16
+
+0%
+
+
+
+Phase A：协议冻结
+[ ] 冻结 H1–H3 与 K1–K6
+[ ] 固定四个数据集与两类模型
+[ ] 完成 Phase 0 归档及数据角色账本
+[ ] 冻结威胁模型与隐私保护边界
+
+
+Phase B：工程建设
+[ ] 建立统一数据及模型接口
+[ ] 实现结构化本地隐私保护方法
+[ ] 建立共享隔离及数据流检查
+[ ] 实现 audit、replay、reproduce、report 接口
+
+
+Phase C：正式实验
+[ ] 完成 Exp.1 隐私暴露机制复现
+[ ] 完成 Exp.2 个性化效用约束复现
+[ ] 完成 Exp.3 本地保护方法复现
+[ ] 完成 Exp.4 保护边界及适用性验证
+
+
+Phase D：结果定型
+[ ] 完成 K1–K6 统一统计判定
+[ ] 报告阴性结果及所有协议偏离
+[ ] 生成四张论文主图及结果表
+[ ] 完成复现说明与研究限制
+
+清单针对新建正式实验工程及验收过程，不代表 V1–V76 前置研究尚未完成。
+
+十四、最终研究创新点及发表价值评估
+14.1 创新点一：神经数据隐私暴露的记录依赖分析
+现有 EEG 隐私研究已经涉及成员推断、身份关联及隐私保护方法，但不同数据角色下的成员相关信号仍需要明确区分。
+
+本研究通过实际入训记录、同日未入训记录及跨日未入训记录的对照，结合基础模型冻结及适配条件，研究个人神经数据参与共享学习所产生的记录依赖及其泛化边界。
+
+其潜在创新在于将神经模型隐私风险进一步定位到具体训练记录依赖和模型适配条件，而不是仅报告总体成员识别结果。
+
+创新类型：隐私风险形成条件与机制分析。
+14.2 创新点二：揭示个人神经数据隐私保护中的个性化效用约束
+通过本人历史、无历史及等量匹配者历史的控制比较，研究个人神经历史对未来解码任务的实际价值。
+
+这一研究说明，在部分纵向神经任务中，个人历史不仅具有隐私敏感性，也具有不可由等量普通历史简单替代的任务价值。
+
+因此，神经数据隐私保护应当关注对个人信息的受限利用，而不是以消除全部个体相关信息为唯一目标。
+
+创新类型：神经数据隐私保护与个性化效用关系。
+14.3 创新点三：提出效用保持型结构化本地隐私保护方法
+提出基于共享学习与个人学习分离的 S-PBNP 方法。
+
+通过固定背景编码器和结构化背景损失摘要，在个人设备端近似原本需要集中式背景数据及个人历史才能完成的任务头优化，使目标个人历史无需进入规定共享训练过程。
+
+通过任务非劣、预测近似、资源成本和共享产物隔离，联合评价该保护方法的有效性与适用范围。
+
+该方法的核心价值不是首次提出低秩 Hessian，也不是首次实现本地个性化，而是将隐私风险、历史任务价值、集中式目标近似及共享边界验证统一到一个明确的神经数据保护问题中。
+
+创新类型：效用保持型神经数据隐私保护方法。
+14.4 与已有研究的区别
+对比维度	已有相关研究	本研究
+EEG 成员推断	评价模型成员风险	区分实际记录依赖及纵向边界
+EEG 个性化学习	提升解码性能	明确隐私保护的任务效用约束
+身份信息抑制	降低身份相关表示	保留本地有用个人信息，限制共享暴露
+联邦学习	多方共同更新共享模型	新增目标历史不参与共享更新
+无源域适配	不访问源域原始数据	同时研究目标历史的共享隔离及集中式任务头近似
+EWC、Laplace、曲率近似	保留已有知识	以效用保持支撑目标神经历史本地保护
+普通本地学习	本地适配模型	统一共享隔离、效用非劣与资源评价
+
+这一定位有助于避免与现有研究形成简单重复，但最终方法贡献仍取决于结构化曲率是否确实具有超出简单本地约束的优势。
+14.5 当前研究发表潜力
+期刊方向	当前研究基础
+IEEE Transactions on Neural Systems and Rehabilitation Engineering	神经解码、个性化学习与 BCI 隐私方向具有较好契合度
+IEEE Journal of Biomedical and Health Informatics	神经数据隐私及模型风险研究具有相关性
+Journal of Neural Engineering	适合神经解码方法及纵向个性化验证
+Brain Informatics	适合神经数据隐私风险及学习保护框架
+Information Fusion	需要进一步突出背景知识利用及方法贡献
+Nature Machine Intelligence	需要更强的科学创新、方法必要性及证据严谨性，目前不能确定是否达到要求
+
+当前研究已具备明确的隐私风险现象、多个 EEG 队列及本地保护方法基础。
+
+但相对于高水平综合性 AI 论文，仍然需要解决以下核心问题：
+- 记录依赖分析是否提供了超出已有 EEG 成员推断研究的新认识。
+- 个人历史收益的实际大小是否足以支持引入复杂保护方法。
+- 结构化曲率是否优于简单本地学习及对角近似。
+- 共享隔离是否被准确地定义、验证及表述。
+- 既有队列与事后选型所造成的证据局限是否得到充分披露。
+这些问题应通过现有固定实验框架回答，而不是再次进行大规模探索。
+
+十五、Phase 0 最终收口决议
+Final Protocol 1.0
+神经数据隐私保护研究最终协议
+研究领域	神经数据隐私保护
+研究对象	EEG 神经解码模型
+保护对象	目标个人神经历史
+核心风险	训练记录相关成员暴露
+总体目标	效用保持型神经数据隐私保护
+科学假设	H1–H3
+正式实验	Experiment 1–4
+核心检验	K1–K6
+固定数据集	OpenBMI、Dreyer、Stieger、NETBCI
+固定模型	CBraMod、TS-LR
+核心保护方法	S-PBNP
+保护机制	共享学习与个人学习分离
+效用要求	联合非劣及预测近似
+前置研究	结束探索，全部归档
+后续工作	固定协议复现与论文证据整合
+
+
+最终完整研究逻辑
+
+Experiment 1｜隐私风险发现
+
+个人神经数据参与共享训练后，形成与实际入训记录相关的成员信号。
+为什么需要保护？
+
+
+
+Experiment 2｜保护效用约束
+
+个人神经历史具有条件性任务价值，不能简单禁止全部历史利用。
+为什么不能直接删除个人信息？
+
+
+
+Experiment 3｜隐私保护方法
+
+通过结构化背景损失摘要，在个人设备端完成历史学习并近似精确共享任务头效用。
+如何在保护隐私的同时保留任务价值？
+
+
+
+Experiment 4｜保护能力验证
+
+验证共享产物不依赖目标个人历史，并明确任务效用及系统保护边界。
+能够保护什么，不能保护什么？
+
+
+最终研究 Idea 总结
+本研究以神经解码模型中的个人神经数据隐私保护为核心，首先研究个人神经历史参与共享模型训练所产生的记录相关成员信号，明确其形成条件、模型适配范围的影响及纵向泛化边界。
+
+在此基础上，研究个人神经历史的条件性任务价值，揭示神经数据隐私保护与个性化解码效用之间的关系，明确完全排除个人历史可能造成的任务效用损失。
+
+进一步提出基于结构化背景损失摘要的本地隐私保护方法，通过固定共享编码器、分离共享背景学习与个人历史学习，使目标个人历史能够用于本人神经解码任务，而无需参与规定的共享训练与发布过程。
+
+最终，通过任务非劣性、预测近似精度、共享产物不依赖性及系统数据流验证，建立具有明确保护对象、效用约束及适用边界的神经数据隐私保护框架。
+
+本次方案完整沿用了上传参考文本的十五部分研究框架，同时将隐私保护调整为首要目标，并统一了科学假设、正式实验、统计体系、保护声明及论文创新点。文献部分在已有调研清单基础上重新核查了若干直接相关工作，并补充了 2026 年 11 月最新 EEG 成员风险预印本；没有对所有历史参考文献重新进行全文审查。现有实验结果依据此前上传的 (3).md 实验报告及参考文本，尚未重新训练模型或独立核验全部原始代码。
+
+最终确定：正式结束 Phase 0，后续不再进行探索性扩展。研究重点从发现神经数据隐私问题，转向建立具有明确科学假设、效用约束、保护机制和验证标准的神经数据隐私保护方法。

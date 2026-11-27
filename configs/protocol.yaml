@@ -1,0 +1,116 @@
+project:
+  name: neuroprivacy_final
+  protocol_version: "1.0"
+  research_focus: neural_data_privacy
+  phase0_status: closed
+  phase: frozen_reproduction
+  evidence_cutoff: "2026-11-26"
+
+scope:
+  datasets:
+    - OpenBMI
+    - Dreyer2023
+    - Stieger2021
+    - NETBCI
+
+  model_families:
+    - CBraMod
+    - TS-LR
+
+  allow_new_datasets: false
+  allow_new_models: false
+  allow_new_privacy_attacks: false
+  allow_new_protection_algorithms: false
+  allow_hyperparameter_search: false
+  allow_exploratory_extension: false
+
+hypotheses:
+  H1: training_record_exposure
+  H2: personalization_utility_constraint
+  H3: utility_preserving_privacy_isolation
+
+experiments:
+  exp1_privacy_exposure:
+    enabled: true
+    datasets:
+      - OpenBMI
+      - Dreyer2023
+      - Stieger2021
+
+  exp2_utility_constraint:
+    enabled: true
+    datasets:
+      - OpenBMI
+      - Stieger2021
+      - NETBCI
+
+  exp3_privacy_preserving_learning:
+    enabled: true
+    datasets:
+      - OpenBMI
+      - Stieger2021
+      - NETBCI
+
+  exp4_privacy_boundary:
+    enabled: true
+    datasets:
+      - OpenBMI
+      - Stieger2021
+
+privacy:
+  protected_object: target_personal_history
+
+  shared_encoder_frozen: true
+  target_history_in_shared_training: false
+  target_history_in_shared_preprocessing: false
+  target_history_in_shared_selection: false
+
+  allow_local_history_learning: true
+  allow_local_calibration: true
+
+  target_history_upload: false
+  personal_model_update_upload: false
+
+  require_shared_artifact_invariance: true
+
+  claim_formal_differential_privacy: false
+  claim_background_participant_privacy: false
+  claim_complete_device_security: false
+
+personalization:
+  method: S-PBNP
+
+  curvature:
+    OpenBMI:
+      rank: 8
+
+    Stieger2021:
+      rank: 16
+
+    NETBCI:
+      rank: 4
+
+statistics:
+  historical_ci_level: 0.975
+  primary_family_alpha: 0.05
+  multiplicity_adjustment: holm
+  seed_aggregation: within_statistical_unit
+
+  noninferiority:
+    ba_margin: -0.03
+    brier_margin: 0.005
+
+  approximation:
+    probability_mae_upper: 0.01
+
+execution:
+  preserve_original_partitions: true
+  preserve_negative_results: true
+
+  automatic_experiment_extension: false
+  automatic_reselection_on_failure: false
+
+  require_data_manifest: true
+  require_resolved_config: true
+  require_provenance: true
+  require_protocol_deviation_log: true

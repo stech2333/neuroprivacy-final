@@ -1,0 +1,4 @@
+# Preserve exact file bytes for SHA-256 reproduction receipts.
+* -text
+*.pdf binary
+*.png binary

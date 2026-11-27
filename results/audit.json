@@ -1,0 +1,70 @@
+{
+  "baseline": {
+    "archive_files": 27057,
+    "archive_bytes": 64755312771,
+    "archived_files_rehashed": 415,
+    "mode": "core",
+    "sealed_inputs_and_outputs": 26,
+    "model_assets": 9,
+    "cohort_coverage": {
+      "OpenBMI": {
+        "people": {
+          "development": 6,
+          "background": 12,
+          "evaluation": 36
+        },
+        "recipe_allocations": {
+          "V11 H40": 3600,
+          "V46 H20": 3600
+        }
+      },
+      "Dreyer": {
+        "people": {
+          "development": 12,
+          "background": 24,
+          "evaluation": 50,
+          "reserve": 1
+        },
+        "recipe_allocations": {
+          "V47": 4000
+        }
+      },
+      "Stieger": {
+        "people": {
+          "development": 6,
+          "background": 12,
+          "evaluation": 44
+        },
+        "recipe_allocations": {
+          "V68 C8": 3872,
+          "V61 interleaved": 10560,
+          "V65 blocks": 10080
+        }
+      },
+      "NETBCI": {
+        "people": {
+          "background": 7,
+          "evaluation": 12
+        },
+        "recipe_allocations": {
+          "V67 C8": 1488
+        }
+      }
+    }
+  },
+  "cached_runs": {
+    "K6": {
+      "openbmi": {
+        "status": "Isolation passed",
+        "shared_prediction_max_drift": 0.0,
+        "local_probability_MAE_after_history_swap": 0.029558724810886745
+      },
+      "stieger": {
+        "status": "Isolation passed",
+        "shared_prediction_max_drift": 0.0,
+        "local_probability_MAE_after_history_swap": 0.024936431997610278
+      }
+    },
+    "scope": "downstream fixed configuration and tested offline reference paths"
+  }
+}
